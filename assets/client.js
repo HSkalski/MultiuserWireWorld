@@ -52,6 +52,11 @@ var swapTool = function(tool){
     document.getElementById("selectedTool").innerHTML = tool;
 }
 
+var startStop = function(data){
+    socket.emit('startStop',{data});
+}
+
+
 function getMousePosition(canvas, event) { 
     let rect = canvas.getBoundingClientRect(); 
     let x = event.clientX - rect.left; 
@@ -62,7 +67,7 @@ function getMousePosition(canvas, event) {
         x:parseInt(x/20),
         y:parseInt(y/20),
         tool:playerTool
-    })
+    });
 } 
 
 let canvasElem = document.querySelector("canvas"); 

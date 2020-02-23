@@ -14,6 +14,7 @@ console.log("Server started on port ",PORT);
 var width = 1000;
 var height = 500;
 var cellSize = 20;
+var paused = true;
 
 var board = new Array(height/cellSize).fill(0);
 console.log("Board Height: ", board.length)
@@ -39,11 +40,24 @@ io.on('connection', function(socket){
     })
 
     socket.on('click', function(data){
-        board[data.y][data.x] = data.tool;
+        if(data.y < board.length && data.x < board[0].length){
+            board[data.y][data.x] = data.tool; 
+        }
         console.log(data);
         socket.emit('boardData',{
             board:board
         })
+    })
+
+    socket.on('startStop', function(data){
+        console.log(data);
+        if(data.data == 'start'){
+            paused = false;
+        }
+        else if(data.data == 'stop'){
+            paused = true;
+        }
+
     })
 
     socket.on('disconnect', function(){
@@ -64,25 +78,27 @@ setInterval(function(){
 
 // Logic
 setInterval(function(){
-    for(var y = 0; y < board.length; y++){
-        for(var x = 0; x < board[0].length; x++){
-            if (board[y][x] == 2){
-                nborType = getNeighbors(x,y);
-                for(var i = 0; i < nborType.length; i++){
-                    
-                    if(nborType[i]==1){ // If neighbor is wire
-                        setNbor = whichNeighbor(i);
-                        board[y+setNbor[0]][x+setNbor[1]] = 2;
+    if(!paused){
+        for(var y = 0; y < board.length; y++){
+            for(var x = 0; x < board[0].length; x++){
+                if (board[y][x] == 2){
+                    nborType = getNeighbors(x,y);
+                    for(var i = 0; i < nborType.length; i++){
+                        
+                        if(nborType[i]==1){ // If neighbor is wire
+                            setNbor = whichNeighbor(i);
+                            board[y+setNbor[0]][x+setNbor[1]] = 2;
+                        }
                     }
+                    board[y][x] = 3;
                 }
-                board[y][x] = 3;
-            }
-            else if(board[y][x] == 3){
-                board[y][x] = 1;
+                else if(board[y][x] == 3){
+                    board[y][x] = 1;
+                }
             }
         }
     }
-}, 1000);
+}, 1000/10);
 
 /*
 Returns neighbors in this order: 
