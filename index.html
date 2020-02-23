@@ -1,0 +1,45 @@
+
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Collaborative Wireworld Simulation</title>
+        <!-- Load the Socket.io networking library -->
+        <script src="/socket.io/socket.io.js"></script>
+
+        <!-- Some simple styles and fonts -->
+        <style type="text/css">
+            body,html { /* Remove margins */
+                margin: 0px;
+                position: relative;
+                background-color:black; 
+            }
+            canvas {
+                margin:auto;
+            }
+            .text{
+                color:white;
+                font-family:monospace;
+                font-size: 40px;
+            }
+            .button{
+                background: gray;
+                color:white;
+                font-family:monospace;
+                font-size: 40px;
+            }
+        </style>
+        <canvas id="game" width="1000" height="500" style="border:1px solid white;">
+            Can't load canvas :\
+        </canvas>
+    </head>
+    <body>
+        <script src="/assets/client.js"></script>
+        <div>
+            <button class=button onclick="swapTool('Wire')">Wire</button>
+            <button class=button onclick="swapTool('Head')">Head</button>
+            <button class=button onclick="swapTool('Tail')">Tail</button>
+            <button class=button onclick="swapTool('Erase')">Erase</button>
+            <div id='selectedTool' class=text white>Wire</p>
+        </div>
+    </body>
+</html>
