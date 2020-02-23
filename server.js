@@ -84,7 +84,7 @@ setInterval(function(){
         for(var y = 0; y < boardCopy.length; y++){
             for(var x = 0; x < boardCopy[0].length; x++){
                 if (boardCopy[y][x] == 2){
-                    nborType = getNeighbors(x,y);
+                    nborType = getNeighbors(x,y, boardCopy);
                     for(var i = 0; i < nborType.length; i++){
                         if(nborType[i]==1){ // If neighbor is wire
                             setNbor = whichNeighbor(i);
@@ -107,16 +107,16 @@ Returns neighbors in this order:
   3 x 1
   6 2 5
 */
-var getNeighbors = function(x,y){
+var getNeighbors = function(x,y, currBoard){
     var nbors = new Array(8);
-    nbors[0] = board[y-1][x]
-    nbors[1] = board[y] [x+1]
-    nbors[2] = board[y+1] [x]
-    nbors[3] = board[y] [x-1]
-    nbors[4] = board[y-1] [x+1]
-    nbors[5] = board[y+1] [x+1]
-    nbors[6] = board[y+1] [x-1]
-    nbors[7] = board[y-1] [x-1]
+    nbors[0] = currBoard[y-1][x]
+    nbors[1] = currBoard[y] [x+1]
+    nbors[2] = currBoard[y+1] [x]
+    nbors[3] = currBoard[y] [x-1]
+    nbors[4] = currBoard[y-1] [x+1]
+    nbors[5] = currBoard[y+1] [x+1]
+    nbors[6] = currBoard[y+1] [x-1]
+    nbors[7] = currBoard[y-1] [x-1]
     return nbors;
 }
 
