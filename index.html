@@ -28,20 +28,23 @@
                 font-size: 40px;
             }
         </style>
+    </head>
+    <body>
+        <div>        
+            <button class=button onclick="startStop('start')">Start</button>
+            <button class=button onclick="startStop('stop')">Stop</button>
+    </div>
         <canvas id="game" width="1000" height="500" style="border:1px solid white;">
             Can't load canvas :\
         </canvas>
-    </head>
-    <body>
-        <script src="/assets/client.js"></script>
         <div>
             <button class=button onclick="swapTool('Wire')">Wire</button>
             <button class=button onclick="swapTool('Head')">Head</button>
             <button class=button onclick="swapTool('Tail')">Tail</button>
             <button class=button onclick="swapTool('Erase')">Erase</button>
-            <button class=button onclick="startStop('start')">Start</button>
-            <button class=button onclick="startStop('stop')">Stop</button>
             <div id='selectedTool' class=text white>Wire</p>
-        </div>
+            </div>
+        
+        <script src="/assets/client.js"></script>
     </body>
 </html>

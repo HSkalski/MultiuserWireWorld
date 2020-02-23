@@ -43,7 +43,6 @@ io.on('connection', function(socket){
         if(data.y < board.length && data.x < board[0].length){
             board[data.y][data.x] = data.tool; 
         }
-        console.log(data);
         socket.emit('boardData',{
             board:board
         })
@@ -76,15 +75,17 @@ setInterval(function(){
     }
 }, 1000/10)
 
+// Problem, bug when head is moving down or right
+// Make copy of board to reference against?
 // Logic
 setInterval(function(){
     if(!paused){
-        for(var y = 0; y < board.length; y++){
-            for(var x = 0; x < board[0].length; x++){
-                if (board[y][x] == 2){
+        var boardCopy = arrayClone(board);
+        for(var y = 0; y < boardCopy.length; y++){
+            for(var x = 0; x < boardCopy[0].length; x++){
+                if (boardCopy[y][x] == 2){
                     nborType = getNeighbors(x,y);
                     for(var i = 0; i < nborType.length; i++){
-                        
                         if(nborType[i]==1){ // If neighbor is wire
                             setNbor = whichNeighbor(i);
                             board[y+setNbor[0]][x+setNbor[1]] = 2;
@@ -92,13 +93,13 @@ setInterval(function(){
                     }
                     board[y][x] = 3;
                 }
-                else if(board[y][x] == 3){
+                else if(boardCopy[y][x] == 3){
                     board[y][x] = 1;
                 }
             }
         }
     }
-}, 1000/10);
+}, 1000);
 
 /*
 Returns neighbors in this order: 
@@ -140,4 +141,22 @@ var whichNeighbor = function(index){
         default:
             break;
     }
+}
+
+function arrayClone( arr ) {
+
+    var i, copy;
+
+    if( Array.isArray( arr ) ) {
+        copy = arr.slice( 0 );
+        for( i = 0; i < copy.length; i++ ) {
+            copy[ i ] = arrayClone( copy[ i ] );
+        }
+        return copy;
+    } else if( typeof arr === 'object' ) {
+        throw 'Cannot clone array containing an object!';
+    } else {
+        return arr;
+    }
+
 }
