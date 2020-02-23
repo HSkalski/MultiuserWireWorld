@@ -17,7 +17,6 @@ var playerTool = 1;
 
 
 socket.on('boardData', function(data){
-    console.log(data)
     drawBoard(data.board);
 })
 
