@@ -97,7 +97,16 @@ setInterval(function(){
     }
 }, 1000/24)
 
-// Logic
+// Logic Function
+/*
+Rules:
+    empty: stays empty
+    head: becomes tail
+    tail: becomes copper
+    copper: stays copper unless it has just one or two neighbours 
+            that are electron heads, then it becomes a head
+*/
+
 var logicFunction = function(){
     logicInterval = setInterval(function(){
         if(!paused){
