@@ -15,6 +15,7 @@ var width = 1000;
 var height = 500;
 var cellSize = 20;
 var paused = true;
+var tickSpeed = 10; // ticks per second
 
 var board = new Array(height/cellSize).fill(0);
 console.log("Board Height: ", board.length)
@@ -59,6 +60,11 @@ io.on('connection', function(socket){
 
     })
 
+    socket.on('speed', function(data){
+        tickSpeed = data.speed * .75;
+        console.log(tickSpeed);
+    })
+
     socket.on('disconnect', function(){
         delete SOCKET_LIST[socket.id];
         console.log('user left');
@@ -72,11 +78,12 @@ setInterval(function(){
         socket.emit('boardData',{
             board:board
         })
+        socket.emit('speedData',{
+            speed:(tickSpeed * 4/3)
+        })
     }
 }, 1000/10)
 
-// Problem, bug when head is moving down or right
-// Make copy of board to reference against?
 // Logic
 setInterval(function(){
     if(!paused){
@@ -99,7 +106,7 @@ setInterval(function(){
             }
         }
     }
-}, 1000);
+}, 1000/tickSpeed);
 
 /*
 Returns neighbors in this order: 
@@ -143,19 +150,19 @@ var whichNeighbor = function(index){
     }
 }
 
-function arrayClone( arr ) {
-
+function arrayClone(arr){
     var i, copy;
-
-    if( Array.isArray( arr ) ) {
-        copy = arr.slice( 0 );
-        for( i = 0; i < copy.length; i++ ) {
-            copy[ i ] = arrayClone( copy[ i ] );
+    if(Array.isArray(arr)){
+        copy = arr.slice(0);
+        for(i = 0; i < copy.length; i++){
+            copy[i] = arrayClone(copy[i]);
         }
         return copy;
-    } else if( typeof arr === 'object' ) {
+    }
+    else if(typeof arr === 'object'){
         throw 'Cannot clone array containing an object!';
-    } else {
+    }
+    else{
         return arr;
     }
 

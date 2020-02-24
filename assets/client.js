@@ -14,11 +14,20 @@ var color={0:"rgb(20, 0, 100)",
     2:"red",
     3:"orange"};
 var playerTool = 1;
+var slider = document.getElementById("speedRange")
 
 
 socket.on('boardData', function(data){
     drawBoard(data.board);
 })
+
+socket.on('speedData', function(data){
+    slider.value = data.speed;
+})
+
+slider.oninput = function(){
+    socket.emit('speed',{speed:slider.value})
+}
 
 var drawBoard = function(board){
     for(var y = 0; y <= board.length-1; y += 1){

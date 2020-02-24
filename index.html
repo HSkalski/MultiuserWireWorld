@@ -1,50 +1,82 @@
-
 <html>
-    <head>
-        <meta charset="UTF-8" />
-        <title>Collaborative Wireworld Simulation</title>
-        <!-- Load the Socket.io networking library -->
-        <script src="/socket.io/socket.io.js"></script>
 
-        <!-- Some simple styles and fonts -->
-        <style type="text/css">
-            body,html { /* Remove margins */
-                margin: 0px;
-                position: relative;
-                background-color:black; 
-            }
-            canvas {
-                margin:auto;
-            }
-            .text{
-                color:white;
-                font-family:monospace;
-                font-size: 40px;
-            }
-            .button{
-                background: gray;
-                color:white;
-                font-family:monospace;
-                font-size: 40px;
-            }
-        </style>
-    </head>
-    <body>
-        <div>        
-            <button class=button onclick="startStop('start')">Start</button>
-            <button class=button onclick="startStop('stop')">Stop</button>
+<head>
+    <meta charset="UTF-8" />
+    <title>Collaborative Wireworld Simulation</title>
+    <!-- Load the Socket.io networking library -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <!-- Some simple styles and fonts -->
+    <style type="text/css">
+        body,
+        html {
+            /* Remove margins */
+            margin: 0px;
+            position: relative;
+            background-color: black;
+        }
+        canvas {
+            margin: auto;
+        }
+        .text {
+            color: white;
+            font-family: monospace;
+            font-size: 40px;
+        }
+        .button {
+            background: gray;
+            color: white;
+            font-family: monospace;
+            font-size: 40px;
+        }
+        .slider {
+            -webkit-appearance: none;
+            width: 150px;
+            height: 25px;
+            background: darkgray;
+            outline: none;
+            opacity: 0.8;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
+        .slider:hover {
+            opacity: 1;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            background: white;
+            cursor: pointer;
+        }
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            background: black;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <button class=button onclick="startStop('start')">Start</button>
+        <button class=button onclick="startStop('stop')">Stop</button>
+        <input type="range" min="1" max="100" value="50" class="slider" id="speedRange">
     </div>
-        <canvas id="game" width="1000" height="500" style="border:1px solid white;">
-            Can't load canvas :\
-        </canvas>
-        <div>
-            <button class=button onclick="swapTool('Wire')">Wire</button>
-            <button class=button onclick="swapTool('Head')">Head</button>
-            <button class=button onclick="swapTool('Tail')">Tail</button>
-            <button class=button onclick="swapTool('Erase')">Erase</button>
-            <div id='selectedTool' class=text white>Wire</p>
-            </div>
-        
+    <canvas id="game" width="1000" height="500" style="border:1px solid white;">
+        Can't load canvas :\
+    </canvas>
+    <div>
+        <button class=button onclick="swapTool('Wire')">Wire</button>
+        <button class=button onclick="swapTool('Head')">Head</button>
+        <button class=button onclick="swapTool('Tail')">Tail</button>
+        <button class=button onclick="swapTool('Erase')">Erase</button>
+        <div id='selectedTool' class=text white>Wire</p>
+        </div>
+
         <script src="/assets/client.js"></script>
-    </body>
+</body>
+
 </html>
