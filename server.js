@@ -14,6 +14,8 @@ console.log("Server started on port ",PORT);
 var width = 1000;
 var height = 500;
 var cellSize = 20;
+var boardWidth = width/cellSize;
+var boardHeight = height/cellSize;
 var paused = true;
 var tickSpeed = 10; // ticks per second
 
@@ -116,14 +118,22 @@ Returns neighbors in this order:
 */
 var getNeighbors = function(x,y, currBoard){
     var nbors = new Array(8);
-    nbors[0] = currBoard[y-1][x]
-    nbors[1] = currBoard[y] [x+1]
-    nbors[2] = currBoard[y+1] [x]
-    nbors[3] = currBoard[y] [x-1]
-    nbors[4] = currBoard[y-1] [x+1]
-    nbors[5] = currBoard[y+1] [x+1]
-    nbors[6] = currBoard[y+1] [x-1]
-    nbors[7] = currBoard[y-1] [x-1]
+    if(y > 0)
+        nbors[0] = currBoard[y-1][x]
+    if(x < boardWidth)
+        nbors[1] = currBoard[y] [x+1]
+    if(y < boardHeight)
+        nbors[2] = currBoard[y+1] [x]
+    if(x > 0)
+        nbors[3] = currBoard[y] [x-1]
+    if(x < boardWidth && y > 0)
+        nbors[4] = currBoard[y-1] [x+1]
+    if(x < boardWidth && y < boardHeight)
+        nbors[5] = currBoard[y+1] [x+1]
+    if(x > 0 && y < boardHeight)
+        nbors[6] = currBoard[y+1] [x-1]
+    if(x > 0 && y > 0)
+        nbors[7] = currBoard[y-1] [x-1]
     return nbors;
 }
 
