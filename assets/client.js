@@ -18,6 +18,9 @@ var slider = document.getElementById("speedRange")
 
 
 socket.on('boardData', function(data){
+    // c.width = data.w;
+    // c.height = data.h;
+    // cs = data.cs;
     drawBoard(data.board);
 })
 

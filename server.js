@@ -11,20 +11,20 @@ var PORT = 2000;
 http.listen(PORT);
 console.log("Server started on port ",PORT);
 
-var width = 1000;
-var height = 500;
+var WIDTH = 1000;
+var HEIGHT = 500;
 var cellSize = 20;
-var boardWidth = width/cellSize;
-var boardHeight = height/cellSize;
+var boardWidth = WIDTH/cellSize;
+var boardHeight = HEIGHT/cellSize;
 var paused = false;
 var tickSpeed = 10; // ticks per second
 var logicInterval;
 var tickReductionRatio = 1/4;
 
-var board = new Array(height/cellSize).fill(0);
+var board = new Array(HEIGHT/cellSize).fill(0);
 console.log("Board Height: ", board.length)
-for(var i = 0; i < height/cellSize; i++){
-    board[i] = new Array(width/cellSize).fill(0);
+for(var i = 0; i < HEIGHT/cellSize; i++){
+    board[i] = new Array(WIDTH/cellSize).fill(0);
 }
 console.log("Board Width: ", board[0].length)
 
@@ -43,9 +43,9 @@ board[8][13] = 1;
 var SOCKET_LIST = {};
 
 io.on('connection', function(socket){
-    console.log('user connection established');
     socket.id = Math.random();
     SOCKET_LIST[socket.id] = socket;
+    console.log('Connected Users: ',Object.keys(SOCKET_LIST).length);
 
     socket.emit('boardData',{
         board:board
@@ -80,7 +80,7 @@ io.on('connection', function(socket){
 
     socket.on('disconnect', function(){
         delete SOCKET_LIST[socket.id];
-        console.log('user left');
+        console.log('Connected Users: ',Object.keys(SOCKET_LIST).length);
     })
 });
 
@@ -89,6 +89,9 @@ setInterval(function(){
     for( var i in SOCKET_LIST){
         var socket = SOCKET_LIST[i];
         socket.emit('boardData',{
+            w:WIDTH,
+            h:HEIGHT,
+            cs:cellSize,
             board:board
         })
         socket.emit('speedData',{
