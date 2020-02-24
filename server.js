@@ -171,6 +171,7 @@ var getNeighbors = function(x,y, currBoard){
     return nbors;
 }
 
+
 function arrayClone(arr){
     var i, copy;
     if(Array.isArray(arr)){
