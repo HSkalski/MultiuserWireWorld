@@ -99,6 +99,11 @@ setInterval(function(){
 
 // Logic Function
 /*
+0 = empty
+1 = wire
+2 = electron head
+3 = electron tail
+
 Rules:
     empty: stays empty
     head: becomes tail
@@ -114,17 +119,22 @@ var logicFunction = function(){
             for(var y = 0; y < boardCopy.length; y++){
                 for(var x = 0; x < boardCopy[0].length; x++){
                     if (boardCopy[y][x] == 2){
-                        nborType = getNeighbors(x,y, boardCopy);
-                        for(var i = 0; i < nborType.length; i++){
-                            if(nborType[i]==1){ // If neighbor is wire
-                                setNbor = whichNeighbor(i);
-                                board[y+setNbor[0]][x+setNbor[1]] = 2;
-                            }
-                        }
                         board[y][x] = 3;
                     }
                     else if(boardCopy[y][x] == 3){
                         board[y][x] = 1;
+                    }
+                    else if(boardCopy[y][x] == 1){
+                        nborType = getNeighbors(x,y, boardCopy);
+                        var numHeads = 0;
+                        for(var i = 0; i < nborType.length; i++){
+                            if(nborType[i]==2){ // If neighbor is wire
+                                numHeads++;
+                            }
+                        }
+                        if(numHeads > 0 && numHeads < 3){
+                            board[y][x] = 2;
+                        }
                     }
                 }
             }
@@ -159,29 +169,6 @@ var getNeighbors = function(x,y, currBoard){
     if(x > 0 && y > 0)
         nbors[7] = currBoard[y-1] [x-1]
     return nbors;
-}
-
-var whichNeighbor = function(index){
-    switch(index){
-        case 0:
-            return [-1,0]
-        case 1:
-            return [0,1];
-        case 2:
-            return [1,0];
-        case 3:
-            return [0,-1];
-        case 4:
-            return [-1,1];
-        case 5:
-            return [1,1];
-        case 6:
-            return [1,-1];
-        case 7:
-            return [-1,-1];
-        default:
-            break;
-    }
 }
 
 function arrayClone(arr){
