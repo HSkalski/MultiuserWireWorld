@@ -16,8 +16,10 @@ var height = 500;
 var cellSize = 20;
 var boardWidth = width/cellSize;
 var boardHeight = height/cellSize;
-var paused = true;
+var paused = false;
 var tickSpeed = 10; // ticks per second
+var logicInterval;
+var tickReductionRatio = 1/4;
 
 var board = new Array(height/cellSize).fill(0);
 console.log("Board Height: ", board.length)
@@ -28,8 +30,15 @@ console.log("Board Width: ", board[0].length)
 
 board[10][10] = 1;
 board[10][11] = 1;
-board[10][12] = 1;
-board[10][13] = 2;
+board[10][12] = 2;
+board[10][13] = 3;
+board[9][14] = 1;
+board[9][9] = 1;
+board[8][10] = 1;
+board[8][11] = 1;
+board[8][12] = 1;
+board[8][13] = 1;
+
 
 var SOCKET_LIST = {};
 
@@ -63,8 +72,10 @@ io.on('connection', function(socket){
     })
 
     socket.on('speed', function(data){
-        tickSpeed = data.speed * .75;
+        tickSpeed = data.speed * tickReductionRatio;
         console.log(tickSpeed);
+        clearInterval(logicInterval);
+        logicFunction();
     })
 
     socket.on('disconnect', function(){
@@ -81,34 +92,38 @@ setInterval(function(){
             board:board
         })
         socket.emit('speedData',{
-            speed:(tickSpeed * 4/3)
+            speed:(tickSpeed / tickReductionRatio)
         })
     }
-}, 1000/10)
+}, 1000/24)
 
 // Logic
-setInterval(function(){
-    if(!paused){
-        var boardCopy = arrayClone(board);
-        for(var y = 0; y < boardCopy.length; y++){
-            for(var x = 0; x < boardCopy[0].length; x++){
-                if (boardCopy[y][x] == 2){
-                    nborType = getNeighbors(x,y, boardCopy);
-                    for(var i = 0; i < nborType.length; i++){
-                        if(nborType[i]==1){ // If neighbor is wire
-                            setNbor = whichNeighbor(i);
-                            board[y+setNbor[0]][x+setNbor[1]] = 2;
+var logicFunction = function(){
+    logicInterval = setInterval(function(){
+        if(!paused){
+            var boardCopy = arrayClone(board);
+            for(var y = 0; y < boardCopy.length; y++){
+                for(var x = 0; x < boardCopy[0].length; x++){
+                    if (boardCopy[y][x] == 2){
+                        nborType = getNeighbors(x,y, boardCopy);
+                        for(var i = 0; i < nborType.length; i++){
+                            if(nborType[i]==1){ // If neighbor is wire
+                                setNbor = whichNeighbor(i);
+                                board[y+setNbor[0]][x+setNbor[1]] = 2;
+                            }
                         }
+                        board[y][x] = 3;
                     }
-                    board[y][x] = 3;
-                }
-                else if(boardCopy[y][x] == 3){
-                    board[y][x] = 1;
+                    else if(boardCopy[y][x] == 3){
+                        board[y][x] = 1;
+                    }
                 }
             }
         }
-    }
-}, 1000/tickSpeed);
+    }, 1000/tickSpeed);
+}
+
+logicFunction();
 
 /*
 Returns neighbors in this order: 
