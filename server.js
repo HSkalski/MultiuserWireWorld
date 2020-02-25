@@ -108,11 +108,11 @@ setInterval(function(){
 3 = electron tail
 
 Rules:
-    empty: stays empty
-    head: becomes tail
-    tail: becomes copper
-    copper: stays copper unless it has just one or two neighbours 
-            that are electron heads, then it becomes a head
+    1. empty: stays empty
+    2. head: becomes tail
+    3. tail: becomes copper
+    4. copper: stays copper unless it has just one or two neighbours 
+               that are electron heads, then it becomes a head
 */
 
 var logicFunction = function(){
@@ -131,7 +131,7 @@ var logicFunction = function(){
                         nborType = getNeighbors(x,y, boardCopy);
                         var numHeads = 0;
                         for(var i = 0; i < nborType.length; i++){
-                            if(nborType[i]==2){ // If neighbor is wire
+                            if(nborType[i]==2){ // If neighbor is head
                                 numHeads++;
                             }
                         }
