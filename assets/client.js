@@ -16,6 +16,12 @@ var color={0:"rgb(20, 0, 100)",
 var playerTool = 1;
 var slider = document.getElementById("speedRange")
 
+socket.on('initData', function(data){
+    c.width = data.w;
+    c.height = data.h;
+    cs = data.cs;
+    drawBoard(data.board);
+})
 
 socket.on('boardData', function(data){
     // c.width = data.w;
