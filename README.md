@@ -1,4 +1,5 @@
 # MultiuserWireWorld
+![Hello Gif](Hello.gif)
 
 ## Welcome!
 This is a project utilizing a node.js webserver and web sockets to create an enviroment for multiple users to interact and build structure for a wireworld cellular automaton. 
