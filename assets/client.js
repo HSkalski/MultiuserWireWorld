@@ -16,6 +16,7 @@ var color={0:"rgb(20, 0, 100)",
 var playerTool = 1;
 var slider = document.getElementById("speedRange")
 
+// First board sent with additional params
 socket.on('initData', function(data){
     c.width = data.w;
     c.height = data.h;
@@ -23,10 +24,8 @@ socket.on('initData', function(data){
     drawBoard(data.board);
 })
 
+// Subsequent boards 
 socket.on('boardData', function(data){
-    // c.width = data.w;
-    // c.height = data.h;
-    // cs = data.cs;
     drawBoard(data.board);
 })
 
