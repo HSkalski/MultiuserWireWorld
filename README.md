@@ -5,7 +5,7 @@
 This is a project utilizing a node.js webserver and web sockets to create an enviroment for multiple users to interact and build structure for a wireworld cellular automaton. 
 
 ## What is Wireworld? 
-is a celluar automaton, it exists on a grid and each cell is in one of four states:
+Wireworld is a celluar automaton, it exists on a grid and each cell is in one of four states:
 * Empty
 * Wire / Conductor (Yellow) 
 * Electron Head (Red)
