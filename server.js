@@ -21,7 +21,7 @@ var tickSpeed = 10; // ticks per second
 var logicInterval;
 var tickReductionRatio = 1/4;
 
-var board = new Array(boardHeight).fill(0);
+var board = new Array(boardHeight);
 console.log("Board Height: ", board.length)
 for(var i = 0; i < HEIGHT/cellSize; i++){
     board[i] = new Array(boardWidth).fill(0);
@@ -98,7 +98,7 @@ setInterval(function(){
             speed:(tickSpeed / tickReductionRatio)
         })
     }
-}, 1000/24)
+}, 1000)
 
 // Logic Function
 /*
