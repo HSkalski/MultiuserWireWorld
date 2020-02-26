@@ -27,6 +27,10 @@ It follows four basic rules each tick:
 
 * Drag drawing
 
+* Copy / Paste
+
+* Drag n' Drop
+
 * Database connection
 
   * Load / Save Boards
