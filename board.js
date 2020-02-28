@@ -16,11 +16,11 @@ class Board {
         
 
         this.grid = new Array(this.boardHeight);
-        console.log("Board Height: ", this.grid.length)
+        //console.log("Board Height: ", this.grid.length)
         for (var i = 0; i < this.height / this.cellSize; i++) {
             this.grid[i] = new Array(this.boardWidth).fill(0);
         }
-        console.log("Board Width: ", this.grid[0].length);
+        //console.log("Board Width: ", this.grid[0].length);
     }
     
 

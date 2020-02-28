@@ -62,14 +62,12 @@
 </head>
 
 <body>
-    <div>
+    <div >
         <button class=button onclick="startStop('start')">Start</button>
         <button class=button onclick="startStop('stop')">Stop</button>
         <input type="range" min="1" max="100" value="50" class="slider" id="speedRange">
         <button class=button onclick="save()">Save</button>
-        <select id="boards" name="boards" class=button>
-            
-        </select>
+        <select id="boards" style="max-width:500px" name="boards" class=button onchange="changeBoard()"></select>
     </div>
     <!-- <div style="max-height: 600px;max-width:1000px;overflow: scroll;"> -->
         <canvas id="game" width="1000" height="600" style="border:2px solid white;">

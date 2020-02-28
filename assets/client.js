@@ -18,10 +18,10 @@ var playerTool = 1;
 var slider = document.getElementById("speedRange")
 
 var boards = []
+var names = []
+
 var boardSelection = document.getElementById("boards")
 var newOption = document.createElement("option");
-newOption.text = "board_0.XXX";
-boardSelection.add(newOption);
 
 // First board sent with additional params
 socket.on('initData', function(data){
@@ -29,9 +29,14 @@ socket.on('initData', function(data){
     c.height = data.h;
     cs = data.cs;
     drawBoard(data.board);
-    boards = data.all_boards
+    //id = data.curr_id;
+    boardSelection.value = data.curr_id;
+    boards = data.all_board_ids;
+    names = data.all_board_names;
     for( i in boards){
-        newOption.text = boards[i];
+        newOption = document.createElement("option");
+        newOption.text = names[i];
+        newOption.value = boards[i];
         boardSelection.add(newOption);
     }
 })
@@ -82,6 +87,9 @@ var startStop = function(data){
     socket.emit('startStop',{data});
 }
 
+var changeBoard = function(){
+    socket.emit('changeBoard',{id:boardSelection.value})
+}
 
 function getMousePosition(canvas, event) { 
     let rect = canvas.getBoundingClientRect(); 
