@@ -9,7 +9,8 @@ var p = 10;
 var cw = bw + (p*2) + 1;
 var ch = bh + (p*2) + 1;
 var cs = 20;
-var color={0:"rgb(20, 0, 100)",
+var color={
+    0:"rgb(20, 0, 100)",
     1:"yellow",
     2:"red",
     3:"orange"};
@@ -27,9 +28,6 @@ socket.on('initData', function(data){
 // Subsequent boards 
 socket.on('boardData', function(data){
     drawBoard(data.board);
-})
-
-socket.on('speedData', function(data){
     slider.value = data.speed;
 })
 
@@ -81,15 +79,20 @@ function getMousePosition(canvas, event) {
     console.log("Coordinate x: " + parseInt(x/20),  
                 "Coordinate y: " + parseInt(y/20)); 
     socket.emit('click', {
-        x:parseInt(x/20),
-        y:parseInt(y/20),
+        x:parseInt(x/cs),
+        y:parseInt(y/cs),
         tool:playerTool
     });
 } 
 
-let canvasElem = document.querySelector("canvas"); 
+var canvasElem = document.querySelector("canvas"); 
   
 c.addEventListener("mousedown", function(e) 
 { 
     getMousePosition(c, e); 
 }); 
+
+var boardSelection = document.getElementById("boards")
+var newOption = document.createElement("option");
+newOption.text = "board_0.XXX";
+boardSelection.add(newOption);

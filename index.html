@@ -66,6 +66,10 @@
         <button class=button onclick="startStop('start')">Start</button>
         <button class=button onclick="startStop('stop')">Stop</button>
         <input type="range" min="1" max="100" value="50" class="slider" id="speedRange">
+        <button class=button onclick="save()">Save</button>
+        <select id="boards" name="boards" class=button>
+            
+        </select>
     </div>
     <!-- <div style="max-height: 600px;max-width:1000px;overflow: scroll;"> -->
         <canvas id="game" width="1000" height="600" style="border:2px solid white;">
@@ -77,10 +81,10 @@
         <button class=button onclick="swapTool('Head')">Head</button>
         <button class=button onclick="swapTool('Tail')">Tail</button>
         <button class=button onclick="swapTool('Erase')">Erase</button>
-        <div id='selectedTool' class=text white>Wire</p>
-        </div>
+        <div id='selectedTool' class=text white>Wire</div>
+    </div>
 
-        <script src="/assets/client.js"></script>
+    <script src="/assets/client.js"></script>
 </body>
 
 </html>
