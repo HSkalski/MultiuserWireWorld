@@ -24,11 +24,15 @@ var defaultBoard;
 
 var startBoards = (boards) => {
     for (id in boards) {
-        setInterval(function () {
-            //console.log(boards[id]);
-            boards[id].update();
-        }, 1000 / 5)
+        startBoard(boards[it])
     }
+}
+
+var startBoard = (board) => {
+    setInterval(function () {
+        //console.log(boards[id]);
+        board.update();
+    }, 1000 / 5)
 }
 
 var createBoard = function (n, h, w, cs) {
@@ -43,7 +47,7 @@ var createBoard = function (n, h, w, cs) {
 }
 
 
-//defaultBoardID = createBoard('Default', HEIGHT, WIDTH, cellSize);
+// defaultBoardID = createBoard('Default', HEIGHT, WIDTH, cellSize);
 
 // BOARD_LIST[defaultBoardID].grid[10][10] = 1;
 // BOARD_LIST[defaultBoardID].grid[10][11] = 1;
@@ -57,12 +61,7 @@ var createBoard = function (n, h, w, cs) {
 // BOARD_LIST[defaultBoardID].grid[8][13] = 1;
 
 
-
-
-
-
-
-
+// Saves the current boards to /boards/board_<ID>
 var saveBoards = () => {
     for (id in BOARD_LIST) {
         fs.writeFile(
@@ -76,28 +75,29 @@ var saveBoards = () => {
     }
 }
 
-//saveBoards();
-
+// Loads boards from /boards directory
 var loadBoards = () => {
     fs.readdir(
         './boards',
         (err, files) => {
             if (err) throw err;
+            console.log("\t",files);
             for (file in files) {
                 fs.readFile(
                     "./boards/" + files[file],
                     (err, data) => {
                         if (err) throw err;
-
+                        console.log("Loading...:  ./boards/" + files[file]);
                         var board = new Board('', 1, 1, 1);
                         var parsedData = JSON.parse(data);
                         Object.assign(board, parsedData)
                         BOARD_LIST[board.id] = board;
-
-                        startBoards(BOARD_LIST);
+                        console.log("\tAdded Board, board_list: ", Object.keys(BOARD_LIST).length)
+                        startBoard(BOARD_LIST[board.id]);
                     }
                 )
             }
+                    
         }
     )
 }
@@ -124,12 +124,13 @@ io.on('connection', function (socket) {
     SOCKET_LIST[socket.id] = socket;
     socket.boardID = Object.keys(BOARD_LIST)[0];
     console.log('Connected Users: ', Object.keys(SOCKET_LIST).length);
-
+    console.log('Board_List length: ', Object.keys(BOARD_LIST).length)
     socket.emit('initData', {
         w: BOARD_LIST[socket.boardID].width,
         h: BOARD_LIST[socket.boardID].height,
         cs: BOARD_LIST[socket.boardID].cellSize,
-        board: BOARD_LIST[socket.boardID].grid
+        board: BOARD_LIST[socket.boardID].grid,
+        all_boards: Object.keys(BOARD_LIST)
     })
 
     socket.on('click', function (data) {
@@ -170,6 +171,7 @@ io.on('connection', function (socket) {
 setInterval(function () {
     for (var i in SOCKET_LIST) {
         var socket = SOCKET_LIST[i];
+        //console.log(socket.boardID);
         socket.emit('boardData', {
             board: BOARD_LIST[socket.boardID].grid,
             speed: (BOARD_LIST[socket.boardID].tickSpeed / BOARD_LIST[socket.boardID].tickReductionRatio)
