@@ -84,7 +84,7 @@ io.on('connection', function (socket) {
         BOARD_LIST[socket.boardID].tickSpeed = data.speed * BOARD_LIST[socket.boardID].tickReductionRatio;
         console.log(BOARD_LIST[socket.boardID].tickSpeed);
         clearInterval(BOARD_LIST[socket.boardID].logicInterval);
-        logicFunction();
+        //logicFunction();
     })
 
     socket.on('disconnect', function () {
