@@ -79,10 +79,10 @@ io.on('connection', function (socket) {
 
     socket.on('startStop', function (data) {
         if (data.data == 'start') {
-            paused = false;
+            board.paused = false;
         }
         else if (data.data == 'stop') {
-            paused = true;
+            board.paused = true;
         }
 
     })
