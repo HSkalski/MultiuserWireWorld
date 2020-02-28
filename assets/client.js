@@ -17,12 +17,23 @@ var color={
 var playerTool = 1;
 var slider = document.getElementById("speedRange")
 
+var boards = []
+var boardSelection = document.getElementById("boards")
+var newOption = document.createElement("option");
+newOption.text = "board_0.XXX";
+boardSelection.add(newOption);
+
 // First board sent with additional params
 socket.on('initData', function(data){
     c.width = data.w;
     c.height = data.h;
     cs = data.cs;
     drawBoard(data.board);
+    boards = data.all_boards
+    for( i in boards){
+        newOption.text = boards[i];
+        boardSelection.add(newOption);
+    }
 })
 
 // Subsequent boards 
@@ -87,12 +98,7 @@ function getMousePosition(canvas, event) {
 
 var canvasElem = document.querySelector("canvas"); 
   
-c.addEventListener("mousedown", function(e) 
-{ 
+c.addEventListener("mousedown", function(e){ 
     getMousePosition(c, e); 
 }); 
 
-var boardSelection = document.getElementById("boards")
-var newOption = document.createElement("option");
-newOption.text = "board_0.XXX";
-boardSelection.add(newOption);
