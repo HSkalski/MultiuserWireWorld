@@ -1,5 +1,6 @@
 
 class Board {
+
     constructor(n, h, w, cs) {
         this.name = n;
         this.id = Math.random();
@@ -97,17 +98,17 @@ class Board {
         var nbors = new Array(8);
         if (y > 0)
             nbors[0] = currBoard[y - 1][x]
-        if (x < this.boardWidth)
+        if (x < this.boardWidth-1)
             nbors[1] = currBoard[y][x + 1]
-        if (y < this.boardHeight)
+        if (y < this.boardHeight-1)
             nbors[2] = currBoard[y + 1][x]
         if (x > 0)
             nbors[3] = currBoard[y][x - 1]
-        if (x < this.boardWidth && y > 0)
+        if (x < this.boardWidth-1 && y > 0)
             nbors[4] = currBoard[y - 1][x + 1]
-        if (x < this.boardWidth && y < this.boardHeight)
+        if (x < this.boardWidth-1 && y < this.boardHeight-1)
             nbors[5] = currBoard[y + 1][x + 1]
-        if (x > 0 && y < this.boardHeight)
+        if (x > 0 && y < this.boardHeight-1)
             nbors[6] = currBoard[y + 1][x - 1]
         if (x > 0 && y > 0)
             nbors[7] = currBoard[y - 1][x - 1]

@@ -3,7 +3,8 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
-var Board = require('./board.js')
+var fs = require('fs');
+var Board = require('./board.js');
 
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
@@ -19,38 +20,109 @@ var BOARD_LIST = {};
 var WIDTH = 1000;
 var HEIGHT = 600;
 var cellSize = 20;
+var defaultBoard;
 
-var createBoard = function(n,h,w,cs){
-    newBoard = new Board(n,h,w,cs);
+var startBoards = (boards) => {
+    for (id in boards) {
+        setInterval(function () {
+            //console.log(boards[id]);
+            boards[id].update();
+        }, 1000 / 5)
+    }
+}
+
+var createBoard = function (n, h, w, cs) {
+    newBoard = new Board(n, h, w, cs);
     BOARD_LIST[newBoard.id] = newBoard;
 
-    setInterval(function(){
+    setInterval(function () {
         BOARD_LIST[newBoard.id].update();
-    },1000/5)
+    }, 1000 / 5)
 
     return newBoard.id;
 }
 
-//var defaultBoard = new Board('Default', HEIGHT, WIDTH, cellSize);
-defaultBoardID = createBoard('Default', HEIGHT, WIDTH, cellSize);
 
-BOARD_LIST[defaultBoardID].grid[10][10] = 1;
-BOARD_LIST[defaultBoardID].grid[10][11] = 1;
-BOARD_LIST[defaultBoardID].grid[10][12] = 2;
-BOARD_LIST[defaultBoardID].grid[10][13] = 3;
-BOARD_LIST[defaultBoardID].grid[9][14] = 1;
-BOARD_LIST[defaultBoardID].grid[9][9] = 1;
-BOARD_LIST[defaultBoardID].grid[8][10] = 1;
-BOARD_LIST[defaultBoardID].grid[8][11] = 1;
-BOARD_LIST[defaultBoardID].grid[8][12] = 1;
-BOARD_LIST[defaultBoardID].grid[8][13] = 1;
+//defaultBoardID = createBoard('Default', HEIGHT, WIDTH, cellSize);
 
-//BOARD_LIST[defaultBoard.id] = defaultBoard;
+// BOARD_LIST[defaultBoardID].grid[10][10] = 1;
+// BOARD_LIST[defaultBoardID].grid[10][11] = 1;
+// BOARD_LIST[defaultBoardID].grid[10][12] = 2;
+// BOARD_LIST[defaultBoardID].grid[10][13] = 3;
+// BOARD_LIST[defaultBoardID].grid[9][14] = 1;
+// BOARD_LIST[defaultBoardID].grid[9][9] = 1;
+// BOARD_LIST[defaultBoardID].grid[8][10] = 1;
+// BOARD_LIST[defaultBoardID].grid[8][11] = 1;
+// BOARD_LIST[defaultBoardID].grid[8][12] = 1;
+// BOARD_LIST[defaultBoardID].grid[8][13] = 1;
+
+
+
+
+
+
+
+
+var saveBoards = () => {
+    for (id in BOARD_LIST) {
+        fs.writeFile(
+            "./boards/board_" + String(id) + ".txt",
+            JSON.stringify(BOARD_LIST[id]),
+            (err) => {
+                // In case of a error throw err. 
+                if (err) throw err;
+            }
+        );
+    }
+}
+
+//saveBoards();
+
+var loadBoards = () => {
+    fs.readdir(
+        './boards',
+        (err, files) => {
+            if (err) throw err;
+            for (file in files) {
+                fs.readFile(
+                    "./boards/" + files[file],
+                    (err, data) => {
+                        if (err) throw err;
+
+                        var board = new Board('', 1, 1, 1);
+                        var parsedData = JSON.parse(data);
+                        Object.assign(board, parsedData)
+                        BOARD_LIST[board.id] = board;
+
+                        startBoards(BOARD_LIST);
+                    }
+                )
+            }
+        }
+    )
+}
+loadBoards();
+
+const readline = require('readline').createInterface({
+    input: process.stdin,
+    output: process.stdout
+})
+var consoleInput = () => {
+    readline.question(`---------------\n> `, (data) => {
+        try {
+            eval(data);
+        } catch (err) {
+            console.error(err);
+        }
+        consoleInput();
+    })
+}
+consoleInput();
 
 io.on('connection', function (socket) {
     socket.id = Math.random();
     SOCKET_LIST[socket.id] = socket;
-    socket.boardID = defaultBoardID;
+    socket.boardID = Object.keys(BOARD_LIST)[0];
     console.log('Connected Users: ', Object.keys(SOCKET_LIST).length);
 
     socket.emit('initData', {
@@ -64,6 +136,7 @@ io.on('connection', function (socket) {
         if (data.y < BOARD_LIST[socket.boardID].grid.length && data.x < BOARD_LIST[socket.boardID].grid[0].length) {
             BOARD_LIST[socket.boardID].grid[data.y][data.x] = data.tool;
         }
+
         socket.emit('boardData', {
             board: BOARD_LIST[socket.boardID].grid
         })
@@ -80,9 +153,9 @@ io.on('connection', function (socket) {
     })
 
     socket.on('speed', function (data) {
-        console.log(data.speed, " * ", BOARD_LIST[socket.boardID].tickRecutionRatio);
+        //console.log(data.speed, " * ", BOARD_LIST[socket.boardID].tickRecutionRatio);
         BOARD_LIST[socket.boardID].tickSpeed = data.speed * BOARD_LIST[socket.boardID].tickReductionRatio;
-        console.log(BOARD_LIST[socket.boardID].tickSpeed);
+        //console.log(BOARD_LIST[socket.boardID].tickSpeed);
         clearInterval(BOARD_LIST[socket.boardID].logicInterval);
         //logicFunction();
     })
@@ -93,15 +166,15 @@ io.on('connection', function (socket) {
     })
 });
 
-// Send boards
+// Send correct board states to clients
 setInterval(function () {
     for (var i in SOCKET_LIST) {
         var socket = SOCKET_LIST[i];
         socket.emit('boardData', {
-            board: BOARD_LIST[defaultBoardID].grid
-        })
-        socket.emit('speedData', {
-            speed: (BOARD_LIST[defaultBoardID].tickSpeed / BOARD_LIST[defaultBoardID].tickReductionRatio)
+            board: BOARD_LIST[socket.boardID].grid,
+            speed: (BOARD_LIST[socket.boardID].tickSpeed / BOARD_LIST[socket.boardID].tickReductionRatio)
         })
     }
 }, 1000 / 24)
+
+
