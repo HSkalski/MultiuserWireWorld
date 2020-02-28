@@ -98,7 +98,7 @@ setInterval(function(){
             speed:(tickSpeed / tickReductionRatio)
         })
     }
-}, 1000)
+}, 1000/24)
 
 // Logic Function
 /*
