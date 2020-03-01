@@ -141,3 +141,23 @@ c.addEventListener("mousedown", function(e){
     getMousePosition(c, e); 
 }); 
 
+document.addEventListener("keydown", function(e){
+    console.log(e);
+    switch(e.keyCode){
+        case 72:
+            swapTool('Head');
+            break;
+        case 87:
+            swapTool('Wire');
+            break;
+        case 84:
+            swapTool('Tail');
+            break;
+        case 69:
+            swapTool('Erase');
+            break;
+        default:
+            break;
+    }
+}, false);
+
