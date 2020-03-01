@@ -14,6 +14,7 @@ class Board {
         this.tickRecutionRatio = 1 / 4;
         this.nborType = []
         
+        this.CONNECTED_SOCKETS = {}
 
         this.grid = new Array(this.boardHeight);
         //console.log("Board Height: ", this.grid.length)
