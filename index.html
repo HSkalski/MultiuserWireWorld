@@ -66,7 +66,7 @@
         <button class=button onclick="startStop('start')">Start</button>
         <button class=button onclick="startStop('stop')">Stop</button>
         <input type="range" min="1" max="100" value="50" class="slider" id="speedRange">
-        <button class=button onclick="save()">Save</button>
+        <button class=button onclick="saveBoard()">Save</button>
         <select id="boards" style="max-width:500px" name="boards" class=button onchange="changeBoard()"></select>
     </div>
     <!-- <div style="max-height: 600px;max-width:1000px;overflow: scroll;"> -->
@@ -74,12 +74,27 @@
             Can't load canvas :\
         </canvas>
     <!--</div>-->
-    <div>
+    <div style="margin-bottom: 20;">
         <button class=button onclick="swapTool('Wire')">Wire</button>
         <button class=button onclick="swapTool('Head')">Head</button>
         <button class=button onclick="swapTool('Tail')">Tail</button>
         <button class=button onclick="swapTool('Erase')">Erase</button>
         <div id='selectedTool' class=text white>Wire</div>
+    </div>
+
+    <div class=newboard>
+        <button class=button onclick="showNewBoard()">New Board</button>
+        <div id=newBoardSubmission>
+            <form style="margin-left:70px; margin-top: 10px; margin-bottom: 20px" onsubmit="newBoard();return false">
+                <label class=text for="name">Name:</label>
+                <input class=button type="text" id="name" name="name" value="NAME"><br>
+                <label class=text for="height">Height:</label>
+                <input class=button type="text" id="height" name="height" value="1000"><br>
+                <label class=text for="width">Width:</label>
+                <input class=button type="text" id="width" name="width" value="600"><br>
+                <input class=button type="submit" style="margin-top:10px"value="Submit">
+            </form>
+        </div>
     </div>
 
     <script src="/assets/client.js"></script>
