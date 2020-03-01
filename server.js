@@ -23,7 +23,6 @@ var NAMES = [];
 var WIDTH = 1000;
 var HEIGHT = 600;
 var cellSize = 20;
-var defaultBoard;
 
 var startBoards = (boards) => {
     for (id in boards) {
@@ -42,9 +41,7 @@ var createBoard = function (n, h, w, cs) {
     newBoard = new Board(n, h, w, cs);
     BOARD_LIST[newBoard.id] = newBoard;
 
-    setInterval(function () {
-        BOARD_LIST[newBoard.id].update();
-    }, 1000 / 5)
+    startBoard(BOARD_LIST[newBoard.id])
 
     return newBoard.id;
 }
@@ -227,7 +224,7 @@ io.on('connection', function (socket) {
         IDS = Object.keys(BOARD_LIST);
         NAMES.push(data.name);
         sendBoards();
-        
+        //startBoard(BOARD_LIST[socket.boardID])
     })
 
 
