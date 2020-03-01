@@ -16,6 +16,7 @@ var color={
     3:"orange"};
 var playerTool = 1;
 var slider = document.getElementById("speedRange")
+slider.style.display = "none";
 
 var boards = []
 var names = []
@@ -23,8 +24,12 @@ var names = []
 var boardSelection = document.getElementById("boards")
 var newOption = document.createElement("option");
 
+var newBoardSubmission = document.getElementById("newBoardSubmission")
+newBoardSubmission.style.display = "none";
+
 // First board sent with additional params
 socket.on('initData', function(data){
+    console.log(data)
     c.width = data.w;
     c.height = data.h;
     cs = data.cs;
@@ -33,6 +38,11 @@ socket.on('initData', function(data){
     boardSelection.value = data.curr_id;
     boards = data.all_board_ids;
     names = data.all_board_names;
+
+    var length = boardSelection.options.length;
+    for (i = length-1; i >= 0; i--) {
+        boardSelection.options[i] = null;
+    }
     for( i in boards){
         newOption = document.createElement("option");
         newOption.text = names[i];
@@ -104,6 +114,29 @@ function getMousePosition(canvas, event) {
     });
 } 
 
+function saveBoard(){
+    socket.emit('saveBoard', {})
+}
+
+function showNewBoard(){
+    if(newBoardSubmission.style.display == "none")
+        newBoardSubmission.style.display = "inline";
+    else if(newBoardSubmission.style.display == "inline")
+        newBoardSubmission.style.display = "none";
+}
+
+function newBoard(){
+    var name = document.getElementById("name");
+    var height = document.getElementById("height");
+    var width = document.getElementById("width");
+    console.log(name.value," ", height.value," ", width.value)
+    socket.emit('newBoard',{
+        name: name.value,
+        height: height.value,
+        width: width.value
+    })
+    newBoardSubmission.style.display = "none"
+}
 var canvasElem = document.querySelector("canvas"); 
   
 c.addEventListener("mousedown", function(e){ 
