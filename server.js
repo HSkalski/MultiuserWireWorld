@@ -9,6 +9,7 @@ var Board = require('./board.js');
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
 })
+
 app.use('/assets', express.static(__dirname + '/assets'));
 var PORT = 2000;
 http.listen(PORT);
@@ -62,21 +63,30 @@ BOARD_LIST[defaultBoardID].grid[8][13] = 1;
 
 
 // Saves the current boards to /boards/board_<ID>
-var saveBoards = () => {
+var saveAllBoards = () => {
     for (id in BOARD_LIST) {
-        fs.writeFile(
-            "./boards/board_" + String(id) + ".txt",
-            JSON.stringify(BOARD_LIST[id]),
-            (err) => {
-                // In case of a error throw err. 
-                if (err) throw err;
-            }
-        );
+        saveBoard(id)
     }
+}
+
+// Strip board of connected users before saving to file
+var saveBoard = (id) => {
+    var clone = Object.assign({}, BOARD_LIST[id]);
+    delete clone.CONNECTED_SOCKETS;
+    fs.writeFile(
+        "./boards/board_" + String(id) + ".txt",
+        
+        JSON.stringify(clone),
+        (err) => {
+            // In case of a error throw err. 
+            if (err) throw err;
+        }
+    );
 }
 
 // Loads boards from /boards directory
 var loadBoards = () => {
+    console.log('Loading Files...')
     fs.readdir(
         './boards',
         (err, files) => {
@@ -121,10 +131,12 @@ io.on('connection', function (socket) {
     socket.id = Math.random();
     SOCKET_LIST[socket.id] = socket;
     socket.boardID = Object.keys(BOARD_LIST)[0];
+    BOARD_LIST[socket.boardID].CONNECTED_SOCKETS[socket.id] = socket;
     console.log('-----------------------------')
     console.log('Connected Users: ', Object.keys(SOCKET_LIST).length);
     console.log('Board_List length: ', Object.keys(BOARD_LIST).length);
     console.log('----------------------------')
+    
     var ids = Object.keys(BOARD_LIST);
     var names = [];
     for(id in ids){
@@ -169,10 +181,35 @@ io.on('connection', function (socket) {
     })
 
     socket.on('changeBoard', function (data){
+        delete BOARD_LIST[socket.boardID].CONNECTED_SOCKETS[socket.id];
         socket.boardID = data.id;
+        BOARD_LIST[socket.boardID].CONNECTED_SOCKETS[socket.id] = socket; 
     })
 
+    socket.on('saveBoard', function(data){
+        console.log("SAVING BOARD ",socket.boardID,"...")
+        saveBoard(socket.boardID);
+    })
+
+    // Breaks logic on default board when new board is created
+    socket.on('newBoard', function(data){
+        nBid = createBoard(data.name, data.height, data.width, cellSize);
+        ids = Object.keys(BOARD_LIST);
+        names.push(data.name);
+        socket.emit(('initData'), {
+            w: BOARD_LIST[socket.boardID].width,
+            h: BOARD_LIST[socket.boardID].height,
+            cs: BOARD_LIST[socket.boardID].cellSize,
+            board: BOARD_LIST[socket.boardID].grid,
+            all_board_ids: ids,
+            all_board_names: names,
+            curr_id: socket.boardID
+        })
+    })
+
+
     socket.on('disconnect', function () {
+        delete BOARD_LIST[socket.boardID].CONNECTED_SOCKETS[socket.id]
         delete SOCKET_LIST[socket.id];
         console.log('Connected Users: ', Object.keys(SOCKET_LIST).length);
     })
@@ -180,13 +217,15 @@ io.on('connection', function (socket) {
 
 // Send correct board states to clients
 setInterval(function () {
-    for (var i in SOCKET_LIST) {
-        var socket = SOCKET_LIST[i];
-        //console.log(socket.boardID);
-        socket.emit('boardData', {
-            board: BOARD_LIST[socket.boardID].grid,
-            speed: (BOARD_LIST[socket.boardID].tickSpeed / BOARD_LIST[socket.boardID].tickReductionRatio)
-        })
+    for(var i in BOARD_LIST){
+        var board = BOARD_LIST[i]
+        for(id in board.CONNECTED_SOCKETS){
+            var socket = board.CONNECTED_SOCKETS[id];
+            socket.emit('boardData', {
+                board: BOARD_LIST[socket.boardID].grid,
+                speed: (BOARD_LIST[socket.boardID].tickSpeed / BOARD_LIST[socket.boardID].tickReductionRatio)
+            })
+        }
     }
 }, 1000 / 24)
 
