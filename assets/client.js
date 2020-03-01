@@ -17,6 +17,7 @@ var color={
 var playerTool = 1;
 var drawing = false;
 var lastPos = {x:0,y:0};
+var grid = [];
 var slider = document.getElementById("speedRange")
 slider.style.display = "none";
 
@@ -36,6 +37,7 @@ socket.on('initData', function(data){
     c.height = data.h;
     cs = data.cs;
     drawBoard(data.board);
+    grid = data.board;
     boards = data.all_board_ids;
     names = data.all_board_names;
     var length = boardSelection.options.length;
@@ -107,7 +109,7 @@ function getMousePosition(canvas, event) {
     let y = event.clientY - rect.top; 
     let gridX = parseInt(x/cs);
     let gridY = parseInt(y/cs);
-    if(newCell(gridX,gridY)){
+    if(uniqueCell(gridX,gridY)){
         console.log("Coordinate x: " + gridX,  
                     "Coordinate y: " + gridY); 
         socket.emit('click', {
@@ -118,12 +120,15 @@ function getMousePosition(canvas, event) {
     }
 } 
 
-function newCell(x,y){
+function uniqueCell(x,y){
     console.log("X: ", x," ", lastPos.x)
-    if(x != lastPos.x || y != lastPos.y){
-        lastPos.x = x;
-        lastPos.y = y;
-        return true;
+    console.log(grid[y][x],' ', playerTool)
+    if(grid[y][x] != playerTool){
+        if(x != lastPos.x || y != lastPos.y){
+            lastPos.x = x;
+            lastPos.y = y;
+            return true;
+        }
     }
     return false;
 }
@@ -159,7 +164,7 @@ c.addEventListener("mousedown", function(e){
     getMousePosition(c, e); 
 }); 
 
-c.addEventListener("mouseup", function(e){ 
+document.addEventListener("mouseup", function(e){ 
     drawing = false;
     //getMousePosition(c, e); 
 }); 
