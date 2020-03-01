@@ -56,6 +56,7 @@ socket.on('initData', function(data){
 // Subsequent boards 
 socket.on('boardData', function(data){
     drawBoard(data.board);
+    grid = data.board;
     slider.value = data.speed;
 })
 
@@ -110,8 +111,8 @@ function getMousePosition(canvas, event) {
     let gridX = parseInt(x/cs);
     let gridY = parseInt(y/cs);
     if(uniqueCell(gridX,gridY)){
-        console.log("Coordinate x: " + gridX,  
-                    "Coordinate y: " + gridY); 
+        // console.log("Coordinate x: " + gridX,  
+        //             "Coordinate y: " + gridY); 
         socket.emit('click', {
             x:gridX,
             y:gridY,
@@ -121,16 +122,24 @@ function getMousePosition(canvas, event) {
 } 
 
 function uniqueCell(x,y){
-    console.log("X: ", x," ", lastPos.x)
-    console.log(grid[y][x],' ', playerTool)
+    // console.log("X: ", x," ", lastPos.x)
+    // console.log("Y: ", y," ", lastPos.y)
+    // console.log(grid[y][x],' ', playerTool)
     if(grid[y][x] != playerTool){
-        if(x != lastPos.x || y != lastPos.y){
-            lastPos.x = x;
-            lastPos.y = y;
-            return true;
-        }
+        lastPos.x = x;
+        lastPos.y = y;
+        return true;
     }
-    return false;
+    else if(x != lastPos.x || y != lastPos.y){
+        lastPos.x = x;
+        lastPos.y = y;
+        return true;
+    }
+    else{
+        lastPos.x = x;
+        lastPos.y = y;
+        return false;
+    }
 }
 
 
