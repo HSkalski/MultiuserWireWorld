@@ -23,6 +23,14 @@ It follows four basic rules each tick:
 
 [Wireworld Wikipedia](https://en.wikipedia.org/wiki/Wireworld)
 
+## Setup Instructions
+1. `> git clone https://github.com/HSkalski/MultiuserWireWorld.git`
+2. `> cd MultiUserWireWorld`
+3. `> npm install`
+4. `> mkdir boards`
+5. `> npm start`
+
+
 ## //TODO
 
 * Drag drawing
@@ -33,11 +41,11 @@ It follows four basic rules each tick:
 
 * Database connection
 
-  * Load / Save Boards
+  * Load / Save Boards                     - Local directory board saving / loading / new board, not stable
   
   * Sign in / Sign up
  
-* Multiple simultanious Boards updating
+* Multiple simultanious Boards updating    - Working, not stable
 
 * Better Pan / Zoom 
 
