@@ -17,6 +17,8 @@ console.log("Server started on port ", PORT);
 
 var SOCKET_LIST = {};
 var BOARD_LIST = {};
+var IDS = [];
+var NAMES = [];
 
 var WIDTH = 1000;
 var HEIGHT = 600;
@@ -111,6 +113,25 @@ var loadBoards = () => {
 }
 loadBoards();
 
+var sendBoards = () => {
+    console.log(NAMES)
+    for(var i in BOARD_LIST){
+        var board = BOARD_LIST[i]
+        for(id in board.CONNECTED_SOCKETS){
+            var socket = board.CONNECTED_SOCKETS[id];
+            socket.emit(('initData'), {
+                w: BOARD_LIST[socket.boardID].width,
+                h: BOARD_LIST[socket.boardID].height,
+                cs: BOARD_LIST[socket.boardID].cellSize,
+                board: BOARD_LIST[socket.boardID].grid,
+                all_board_ids: IDS,
+                all_board_names: NAMES,
+                curr_id: socket.boardID
+            })
+        }
+    }
+}
+
 const readline = require('readline').createInterface({
     input: process.stdin,
     output: process.stdout
@@ -137,18 +158,18 @@ io.on('connection', function (socket) {
     console.log('Board_List length: ', Object.keys(BOARD_LIST).length);
     console.log('----------------------------')
     
-    var ids = Object.keys(BOARD_LIST);
-    var names = [];
-    for(id in ids){
-        names.push(BOARD_LIST[ids[id]].name);
+    IDS = Object.keys(BOARD_LIST);
+    NAMES = [];
+    for(id in IDS){
+        NAMES.push(BOARD_LIST[IDS[id]].name);
     }
     socket.emit('initData', {
         w: BOARD_LIST[socket.boardID].width,
         h: BOARD_LIST[socket.boardID].height,
         cs: BOARD_LIST[socket.boardID].cellSize,
         board: BOARD_LIST[socket.boardID].grid,
-        all_board_ids: ids,
-        all_board_names: names,
+        all_board_ids: IDS,
+        all_board_names: NAMES,
         curr_id: socket.boardID
     })
 
@@ -184,6 +205,15 @@ io.on('connection', function (socket) {
         delete BOARD_LIST[socket.boardID].CONNECTED_SOCKETS[socket.id];
         socket.boardID = data.id;
         BOARD_LIST[socket.boardID].CONNECTED_SOCKETS[socket.id] = socket; 
+        socket.emit(('initData'), {
+            w: BOARD_LIST[socket.boardID].width,
+            h: BOARD_LIST[socket.boardID].height,
+            cs: BOARD_LIST[socket.boardID].cellSize,
+            board: BOARD_LIST[socket.boardID].grid,
+            all_board_ids: IDS,
+            all_board_names: NAMES,
+            curr_id: socket.boardID,
+        })
     })
 
     socket.on('saveBoard', function(data){
@@ -194,17 +224,10 @@ io.on('connection', function (socket) {
     // Breaks logic on default board when new board is created
     socket.on('newBoard', function(data){
         nBid = createBoard(data.name, data.height, data.width, cellSize);
-        ids = Object.keys(BOARD_LIST);
-        names.push(data.name);
-        socket.emit(('initData'), {
-            w: BOARD_LIST[socket.boardID].width,
-            h: BOARD_LIST[socket.boardID].height,
-            cs: BOARD_LIST[socket.boardID].cellSize,
-            board: BOARD_LIST[socket.boardID].grid,
-            all_board_ids: ids,
-            all_board_names: names,
-            curr_id: socket.boardID
-        })
+        IDS = Object.keys(BOARD_LIST);
+        NAMES.push(data.name);
+        sendBoards();
+        
     })
 
 
