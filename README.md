@@ -33,22 +33,14 @@ It follows four basic rules each tick:
 
 ## //TODO
 
-* Drag drawing
-
-* Copy / Paste
-
-* Drag n' Drop
-
-* Database connection
-
-  * Load / Save Boards                     - Local directory board saving / loading / new board, not stable
-  
-  * Sign in / Sign up
- 
-* Multiple simultanious Boards updating    - Working, not stable
-
-* Better Pan / Zoom 
-
-* Chat functionality
-
-* Intro / Rules List
+|Objective |Progress |
+| ---      |  ---    |
+|Drag Drawing| Funcional|
+|Drag 'n Drop| Planned|
+|___Database Connection___| |
+|DB Load/Save Boards| Local directory saving,loading,newboard working|
+|DB Sign in/up| Planned|
+|Multiple simultanious Boards updating| Working|
+|Better Pan / Zoom| Planned|
+|Chat functionality|Planned|
+|Intro / Rules List|Planned|
