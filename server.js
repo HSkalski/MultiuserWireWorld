@@ -22,6 +22,9 @@ var NAMES = [];
 
 var WIDTH = 1000;
 var HEIGHT = 600;
+var MAX_WIDTH = 5000;
+var MAX_HEIGHT = 5000;
+var MAX_NAME = 20;
 var cellSize = 20;
 
 var startBoards = (boards) => {
@@ -38,6 +41,7 @@ var startBoard = (board) => {
 }
 
 var createBoard = function (n, h, w, cs) {
+    
     newBoard = new Board(n, h, w, cs);
     BOARD_LIST[newBoard.id] = newBoard;
 
@@ -225,9 +229,21 @@ io.on('connection', function (socket) {
 
     // Breaks logic on default board when new board is created
     socket.on('newBoard', function(data){
-        nBid = createBoard(data.name, data.height, data.width, cellSize);
+        let h = data.height;
+        let w = data.width;
+        let n = data.name;
+        if(h > MAX_HEIGHT){
+            h = MAX_HEIGHT;
+        }
+        if(w > MAX_WIDTH){
+            w = MAX_WIDTH;
+        }
+        if(n.length > MAX_NAME){
+            n = n.substring(0,MAX_NAME);
+        }
+        nBid = createBoard(n, h, w, cellSize);
         IDS = Object.keys(BOARD_LIST);
-        NAMES.push(data.name);
+        NAMES.push(n);
         sendBoards();
         //startBoard(BOARD_LIST[socket.boardID])
     })
