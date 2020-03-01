@@ -33,11 +33,11 @@ It follows four basic rules each tick:
 
 * Database connection
 
-  * Load / Save Boards
+  * Load / Save Boards                     - Local directory board saving / loading / new board, not stable
   
   * Sign in / Sign up
  
-* Multiple simultanious Boards updating
+* Multiple simultanious Boards updating    - Working, not stable
 
 * Better Pan / Zoom 
 
