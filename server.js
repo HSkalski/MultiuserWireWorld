@@ -100,6 +100,7 @@ var loadBoards = () => {
                         var parsedData = JSON.parse(data);
                         Object.assign(board, parsedData)
                         BOARD_LIST[board.id] = board;
+                        BOARD_LIST[board.id].paused = true;
                         startBoard(BOARD_LIST[board.id]);
                     }
                 )
@@ -200,6 +201,10 @@ io.on('connection', function (socket) {
 
     socket.on('changeBoard', function (data){
         delete BOARD_LIST[socket.boardID].CONNECTED_SOCKETS[socket.id];
+        //Check if board just left is empty, pause if it is
+        if(Object.keys(BOARD_LIST[socket.boardID].CONNECTED_SOCKETS).length == 0){
+            BOARD_LIST[socket.boardID].paused = true;
+        }
         socket.boardID = data.id;
         BOARD_LIST[socket.boardID].CONNECTED_SOCKETS[socket.id] = socket; 
         socket.emit(('initData'), {
