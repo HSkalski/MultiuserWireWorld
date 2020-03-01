@@ -34,11 +34,8 @@ socket.on('initData', function(data){
     c.height = data.h;
     cs = data.cs;
     drawBoard(data.board);
-    //id = data.curr_id;
-    boardSelection.value = data.curr_id;
     boards = data.all_board_ids;
     names = data.all_board_names;
-
     var length = boardSelection.options.length;
     for (i = length-1; i >= 0; i--) {
         boardSelection.options[i] = null;
@@ -49,6 +46,7 @@ socket.on('initData', function(data){
         newOption.value = boards[i];
         boardSelection.add(newOption);
     }
+    boardSelection.value = data.curr_id;
 })
 
 // Subsequent boards 
