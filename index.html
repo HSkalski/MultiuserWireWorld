@@ -63,8 +63,10 @@
 
 <body>
     <div >
-        <button class=button onclick="startStop('start')">Start</button>
-        <button class=button onclick="startStop('stop')">Stop</button>
+        <div style="display:inline; margin-right:50px">
+            <button class=button onclick="startStop('start')">Start</button>
+            <button class=button onclick="startStop('stop')">Stop</button>
+        </div>
         <input type="range" min="1" max="100" value="50" class="slider" id="speedRange">
         <button class=button onclick="saveBoard()">Save</button>
         <select id="boards" style="max-width:500px" name="boards" class=button onchange="changeBoard()"></select>
