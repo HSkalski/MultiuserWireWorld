@@ -15,6 +15,8 @@ var color={
     2:"red",
     3:"orange"};
 var playerTool = 1;
+var drawing = false;
+var lastPos = {x:0,y:0};
 var slider = document.getElementById("speedRange")
 slider.style.display = "none";
 
@@ -103,14 +105,29 @@ function getMousePosition(canvas, event) {
     let rect = canvas.getBoundingClientRect(); 
     let x = event.clientX - rect.left; 
     let y = event.clientY - rect.top; 
-    console.log("Coordinate x: " + parseInt(x/20),  
-                "Coordinate y: " + parseInt(y/20)); 
-    socket.emit('click', {
-        x:parseInt(x/cs),
-        y:parseInt(y/cs),
-        tool:playerTool
-    });
+    let gridX = parseInt(x/cs);
+    let gridY = parseInt(y/cs);
+    if(newCell(gridX,gridY)){
+        console.log("Coordinate x: " + gridX,  
+                    "Coordinate y: " + gridY); 
+        socket.emit('click', {
+            x:gridX,
+            y:gridY,
+            tool:playerTool
+        });
+    }
 } 
+
+function newCell(x,y){
+    console.log("X: ", x," ", lastPos.x)
+    if(x != lastPos.x || y != lastPos.y){
+        lastPos.x = x;
+        lastPos.y = y;
+        return true;
+    }
+    return false;
+}
+
 
 function saveBoard(){
     socket.emit('saveBoard', {})
@@ -138,8 +155,19 @@ function newBoard(){
 var canvasElem = document.querySelector("canvas"); 
   
 c.addEventListener("mousedown", function(e){ 
+    drawing = true;
     getMousePosition(c, e); 
 }); 
+
+c.addEventListener("mouseup", function(e){ 
+    drawing = false;
+    //getMousePosition(c, e); 
+}); 
+
+c.addEventListener('mousemove', function(e) {
+    if(drawing)
+        getMousePosition(c, e); 
+});
 
 document.addEventListener("keydown", function(e){
     console.log(e);
