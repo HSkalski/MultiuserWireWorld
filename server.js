@@ -15,6 +15,8 @@ var PORT = 2000;
 http.listen(PORT);
 console.log("Server started on port ", PORT);
 
+
+
 var SOCKET_LIST = {};
 var BOARD_LIST = {};
 var IDS = [];
@@ -34,10 +36,13 @@ var startBoards = (boards) => {
 }
 
 var startBoard = (board) => {
-    setInterval(function () {
-        //console.log(boards[id]);
-        board.update();
-    }, 1000 / 5)
+    board.logicFunction = () =>{
+        board.logicInterval = setInterval(function () {
+            //console.log(boards[id]);
+            board.update();
+        }, 1000 / board.tickSpeed)
+    }
+    board.logicFunction
 }
 
 var createBoard = function (n, h, w, cs) {

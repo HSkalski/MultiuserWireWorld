@@ -10,8 +10,12 @@ class Board {
         this.boardWidth = parseInt(w / cs);
         this.boardHeight = parseInt(h / cs);
         this.paused = false;
+
+        this.logicInterval;
+        this.logicFuncton;
         this.tickSpeed = 10;
         this.tickRecutionRatio = 1 / 4;
+
         this.nborType = []
         
         this.CONNECTED_SOCKETS = {}
