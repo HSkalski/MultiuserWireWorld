@@ -19,7 +19,7 @@ var drawing = false;
 var lastPos = {x:0,y:0};
 var grid = [];
 var slider = document.getElementById("speedRange")
-slider.style.display = "none";
+// slider.style.display = "none";
 
 var boards = []
 var names = []

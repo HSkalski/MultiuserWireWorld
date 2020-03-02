@@ -14,7 +14,7 @@ class Board {
         this.logicInterval;
         this.logicFuncton;
         this.tickSpeed = 10;
-        this.tickRecutionRatio = 1 / 4;
+        this.tickReductionRatio = 1 / 4;
 
         this.nborType = []
         

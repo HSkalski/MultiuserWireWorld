@@ -42,7 +42,7 @@ var startBoard = (board) => {
             board.update();
         }, 1000 / board.tickSpeed)
     }
-    board.logicFunction
+    board.logicFunction()
 }
 
 var createBoard = function (n, h, w, cs) {
@@ -201,11 +201,11 @@ io.on('connection', function (socket) {
     })
 
     socket.on('speed', function (data) {
-        //console.log(data.speed, " * ", BOARD_LIST[socket.boardID].tickRecutionRatio);
         BOARD_LIST[socket.boardID].tickSpeed = data.speed * BOARD_LIST[socket.boardID].tickReductionRatio;
         //console.log(BOARD_LIST[socket.boardID].tickSpeed);
         clearInterval(BOARD_LIST[socket.boardID].logicInterval);
         //logicFunction();
+        startBoard(BOARD_LIST[socket.boardID]);
     })
 
     socket.on('changeBoard', function (data){
