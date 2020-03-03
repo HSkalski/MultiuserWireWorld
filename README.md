@@ -28,8 +28,9 @@ It follows four basic rules each tick:
 2. `> cd MultiUserWireWorld`
 3. `> npm install`
 4. `> mkdir boards`
-5. `> npm start`
-6. Set up `/configs/keys.js` with your mongodb uri
+5. Set up `/configs/keys.js` with your mongodb uri
+6. `> npm start`
+
 
 ## //TODO
 
@@ -38,7 +39,7 @@ It follows four basic rules each tick:
 |Drag Drawing| Funcional|
 |Drag 'n Drop| Planned|
 |___Database Connection___| DB connected|
-|DB Load/Save Boards| Database saving working, loading in progress|
+|DB Load/Save Boards| Database saving and incremental savingworking, loading working|
 |oAuth2 googleSign in/up| Planned|
 |Multiple simultanious Boards updating| Working|
 |Better Pan / Zoom| Planned|
