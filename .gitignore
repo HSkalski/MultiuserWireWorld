@@ -1,6 +1,9 @@
 # Boards
 boards/
 
+# Config files
+configs/
+
 # Logs
 logs
 *.log
