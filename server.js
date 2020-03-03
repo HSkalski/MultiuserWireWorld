@@ -19,13 +19,21 @@ var boardSchema = new mongoose.Schema({
     height: Number,
     width: Number,
     cellSize: Number,
-    
-});
+    baordWidth: Number,
+    boardHeight: Number,
+    paused: Boolean,
+    tickSpeed: Number,
+    tickReductionRatio: Number,
+    nborType: Array,
+    grid: Array,
+    CONNECTED_SOCKETS: Object
+}, {minimize: false});
+var BoardModel = mongoose.model('BoardModel',boardSchema);
 
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
-  console.log('Connected To Database')
+  console.log('Connected To Database!')
 });
 
 app.get('/', function (req, res) {
@@ -100,47 +108,90 @@ var saveAllBoards = () => {
 
 //save individual board
 var saveBoard = (id) => {
+    ///////// Old board saving method ////////////////////
     // Strip board of specific data before saving to file
-    var clone = Object.assign({}, BOARD_LIST[id]);
-    delete clone.CONNECTED_SOCKETS;
-    delete clone.logicInterval;
-    console.log(clone);
-    fs.writeFile(
-        "./boards/board_" + String(id) + ".txt",
+    // var clone = Object.assign({}, BOARD_LIST[id]);
+    // delete clone.CONNECTED_SOCKETS;
+    // delete clone.logicInterval;
+    // console.log(clone);
+    // fs.writeFile(
+    //     "./boards/board_" + String(id) + ".txt",
         
-        JSON.stringify(clone),
-        (err) => {
-            // In case of a error throw err. 
-            if (err) throw err;
-        }
-    );
+    //     JSON.stringify(clone),
+    //     (err) => {
+    //         // In case of a error throw err. 
+    //         if (err) throw err;
+    //     }
+    // );
+    ///////////////////////////////////////////////////////
+
+    var save_board = new BoardModel({
+        name: BOARD_LIST[id].name,
+        id: BOARD_LIST[id].id,
+        height: BOARD_LIST[id].height,
+        width: BOARD_LIST[id].width,
+        cellSize: BOARD_LIST[id].cellSize,
+        baordWidth: BOARD_LIST[id].baordWidth,
+        boardHeight: BOARD_LIST[id].baordWidth,
+        paused: BOARD_LIST[id].paused,
+        tickSpeed: BOARD_LIST[id].tickSpeed,
+        tickReductionRatio: BOARD_LIST[id].tickReductionRatio,
+        nborType: BOARD_LIST[id].nborType,
+        grid: BOARD_LIST[id].grid,
+        CONNECTED_SOCKETS: {}
+    });
+    console.log(save_board);
+    save_board.save(function (err, save_board){
+        if(err) return console.error(err);
+        console.log("Saved Board to Database");
+    });
+
 }
 
 // Loads boards from /boards directory into BOARD_LIST
 var loadBoards = () => {
     console.log('Loading Files...')
-    fs.readdir(
-        './boards',
-        (err, files) => {
-            if (err) throw err;
-            console.log("\t",files);
-            for (file in files) {
-                fs.readFile(
-                    "./boards/" + files[file],
-                    (err, data) => {
-                        if (err) throw err;
-                        var board = new Board('', 1, 1, 1);
-                        var parsedData = JSON.parse(data);
-                        Object.assign(board, parsedData)
-                        BOARD_LIST[board.id] = board;
-                        BOARD_LIST[board.id].paused = true;
-                        startBoard(BOARD_LIST[board.id]);
-                    }
-                )
-            }
-                    
+    ///////////////// Old File Loading Method //////////////
+    // fs.readdir(
+    //     './boards',
+    //     (err, files) => {
+    //         if (err) throw err;
+    //         console.log("\t",files);
+    //         for (file in files) {
+    //             fs.readFile(
+    //                 "./boards/" + files[file],
+    //                 (err, data) => {
+    //                     if (err) throw err;
+    //                     var board = new Board('', 1, 1, 1);
+    //                     var parsedData = JSON.parse(data);
+    //                     Object.assign(board, parsedData)
+    //                     BOARD_LIST[board.id] = board;
+    //                     BOARD_LIST[board.id].paused = true;
+    //                     startBoard(BOARD_LIST[board.id]);
+    //                 }
+    //             )
+    //         }          
+    //     }
+    // )
+    ///////////////////////////////////////////////////////
+    // Kitten.find(function (err, kittens) {
+    //     if (err) return console.error(err);
+    //     console.log(kittens);
+    // })
+    BoardModel.find(function(err, boards){
+        if (err) return console.error(err);
+        console.log(boards);
+        for(var i = 0; i < boards.length; i++){
+            var board = boards[i]
+            var dummy = new Board('',1,1,1);
+            Object.assign(dummy,board);
+            BOARD_LIST[board.id] = board;
+            BOARD_LIST[board.id].paused = true;
+            console.log("Type of: ",typeof(board));
+            console.log(board);
+            startBoard(BOARD_LIST[board.id]);
         }
-    )
+    });
 }
 loadBoards();
 
