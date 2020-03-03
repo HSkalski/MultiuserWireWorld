@@ -8,9 +8,18 @@ var fs = require('fs');
 var Board = require('./board.js');
 var config = require('./configs/keys.js')
 
-mongoose.connect(config.keys.mongodbURI, {
+mongoose.connect(config.mongodb.uri, {
     useNewUrlParser: true, 
     useUnifiedTopology: true
+});
+
+var boardSchema = new mongoose.Schema({
+    name: String,
+    id: Number,
+    height: Number,
+    width: Number,
+    cellSize: Number,
+    
 });
 
 var db = mongoose.connection;
