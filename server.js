@@ -2,9 +2,22 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var mongoose = require('mongoose');
 
 var fs = require('fs');
 var Board = require('./board.js');
+var config = require('./configs/keys.js')
+
+mongoose.connect(config.keys.mongodbURI, {
+    useNewUrlParser: true, 
+    useUnifiedTopology: true
+});
+
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function() {
+  console.log('Connected To Database')
+});
 
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
