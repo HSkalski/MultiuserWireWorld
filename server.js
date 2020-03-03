@@ -19,15 +19,10 @@ var boardSchema = new mongoose.Schema({
     height: Number,
     width: Number,
     cellSize: Number,
-    baordWidth: Number,
-    boardHeight: Number,
-    paused: Boolean,
     tickSpeed: Number,
     tickReductionRatio: Number,
-    nborType: Array,
-    grid: Array,
-    CONNECTED_SOCKETS: Object
-}, {minimize: false});
+    grid: Array
+});
 var BoardModel = mongoose.model('BoardModel',boardSchema);
 
 var db = mongoose.connection;
@@ -99,7 +94,7 @@ BOARD_LIST[defaultBoardID].grid[8][12] = 1;
 BOARD_LIST[defaultBoardID].grid[8][13] = 1;
 
 
-// Saves the current boards to /boards/board_<ID>
+// Saves the current boards to /boards/board_<ID> and database
 var saveAllBoards = () => {
     for (id in BOARD_LIST) {
         saveBoard(id)
@@ -125,67 +120,74 @@ var saveBoard = (id) => {
     // );
     ///////////////////////////////////////////////////////
 
-    var save_board = new BoardModel({
-        name: BOARD_LIST[id].name,
-        id: BOARD_LIST[id].id,
-        height: BOARD_LIST[id].height,
-        width: BOARD_LIST[id].width,
-        cellSize: BOARD_LIST[id].cellSize,
-        baordWidth: BOARD_LIST[id].baordWidth,
-        boardHeight: BOARD_LIST[id].baordWidth,
-        paused: BOARD_LIST[id].paused,
+    BoardModel.findOneAndUpdate({id: id}, {
         tickSpeed: BOARD_LIST[id].tickSpeed,
-        tickReductionRatio: BOARD_LIST[id].tickReductionRatio,
-        nborType: BOARD_LIST[id].nborType,
-        grid: BOARD_LIST[id].grid,
-        CONNECTED_SOCKETS: {}
+        grid: BOARD_LIST[id].grid
+    },{useFindAndModify: false},function(err,doc){
+        if(err){console.error(err)};
+
+        if(doc == null){
+            var save_board = new BoardModel({
+                name: BOARD_LIST[id].name,
+                id: BOARD_LIST[id].id,
+                height: BOARD_LIST[id].height,
+                width: BOARD_LIST[id].width,
+                cellSize: BOARD_LIST[id].cellSize,
+                tickSpeed: BOARD_LIST[id].tickSpeed,
+                tickReductionRatio: BOARD_LIST[id].tickReductionRatio,
+                grid: BOARD_LIST[id].grid
+            });
+            //console.log(save_board);
+            save_board.save(function (err, save_board){
+                if(err) return console.error(err);
+                console.log("Saved Board to Database");
+            });
+        }
+        else{
+            console.log("Updated Board in Database");
+        }
     });
-    console.log(save_board);
-    save_board.save(function (err, save_board){
-        if(err) return console.error(err);
-        console.log("Saved Board to Database");
-    });
+
 
 }
 
-// Loads boards from /boards directory into BOARD_LIST
+// Loads boards from /boards directory and database into BOARD_LIST
 var loadBoards = () => {
     console.log('Loading Files...')
     ///////////////// Old File Loading Method //////////////
-    // fs.readdir(
-    //     './boards',
-    //     (err, files) => {
-    //         if (err) throw err;
-    //         console.log("\t",files);
-    //         for (file in files) {
-    //             fs.readFile(
-    //                 "./boards/" + files[file],
-    //                 (err, data) => {
-    //                     if (err) throw err;
-    //                     var board = new Board('', 1, 1, 1);
-    //                     var parsedData = JSON.parse(data);
-    //                     Object.assign(board, parsedData)
-    //                     BOARD_LIST[board.id] = board;
-    //                     BOARD_LIST[board.id].paused = true;
-    //                     startBoard(BOARD_LIST[board.id]);
-    //                 }
-    //             )
-    //         }          
-    //     }
-    // )
+    fs.readdir(
+        './boards',
+        (err, files) => {
+            if (err) throw err;
+            console.log("\t",files);
+            for (file in files) {
+                fs.readFile(
+                    "./boards/" + files[file],
+                    (err, data) => {
+                        if (err) throw err;
+                        var board = new Board('', 1, 1, 1);
+                        var parsedData = JSON.parse(data);
+                        Object.assign(board, parsedData)
+                        BOARD_LIST[board.id] = board;
+                        BOARD_LIST[board.id].paused = true;
+                        startBoard(BOARD_LIST[board.id]);
+                    }
+                )
+            }          
+        }
+    )
     ///////////////////////////////////////////////////////
-    // Kitten.find(function (err, kittens) {
-    //     if (err) return console.error(err);
-    //     console.log(kittens);
-    // })
+
     BoardModel.find(function(err, boards){
         if (err) return console.error(err);
-        console.log(boards);
         for(var i = 0; i < boards.length; i++){
             var board = boards[i]
-            var dummy = new Board('',1,1,1);
-            Object.assign(dummy,board);
-            BOARD_LIST[board.id] = board;
+            var newBoard = new Board(board.name,board.height,board.width,board.cellSize);
+            newBoard.id = board.id;
+            newBoard.grid = board.grid;
+            newBoard.tickSpeed = board.tickSpeed;
+            newBoard.tickReductionRatio = board.tickReductionRatio;
+            BOARD_LIST[board.id] = newBoard;
             BOARD_LIST[board.id].paused = true;
             console.log("Type of: ",typeof(board));
             console.log(board);
