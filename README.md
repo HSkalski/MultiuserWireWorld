@@ -29,7 +29,7 @@ It follows four basic rules each tick:
 3. `> npm install`
 4. `> mkdir boards`
 5. `> npm start`
-
+6. Set up `/configs/keys.js` with your mongodb uri
 
 ## //TODO
 
