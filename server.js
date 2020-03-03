@@ -49,8 +49,8 @@ var NAMES = [];
 
 var WIDTH = 1000;
 var HEIGHT = 600;
-var MAX_WIDTH = 5000;
-var MAX_HEIGHT = 5000;
+var MAX_WIDTH = 3000;
+var MAX_HEIGHT = 3000;
 var MAX_NAME = 20;
 var cellSize = 20;
 
