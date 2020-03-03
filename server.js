@@ -29,16 +29,16 @@ var MAX_HEIGHT = 5000;
 var MAX_NAME = 20;
 var cellSize = 20;
 
+//start all boards
 var startBoards = (boards) => {
     for (id in boards) {
         startBoard(boards[it])
     }
 }
-
+//Starts interval controlling logic. extra variables allow changing of tickspeed
 var startBoard = (board) => {
     board.logicFunction = () =>{
         board.logicInterval = setInterval(function () {
-            //console.log(boards[id]);
             board.update();
         }, 1000 / board.tickSpeed)
     }
@@ -55,9 +55,8 @@ var createBoard = function (n, h, w, cs) {
     return newBoard.id;
 }
 
-
+// Create default board with loop in it
 defaultBoardID = createBoard('Default', HEIGHT, WIDTH, cellSize);
-
 BOARD_LIST[defaultBoardID].grid[10][10] = 1;
 BOARD_LIST[defaultBoardID].grid[10][11] = 1;
 BOARD_LIST[defaultBoardID].grid[10][12] = 2;
@@ -77,10 +76,13 @@ var saveAllBoards = () => {
     }
 }
 
-// Strip board of connected users before saving to file
+//save individual board
 var saveBoard = (id) => {
+    // Strip board of specific data before saving to file
     var clone = Object.assign({}, BOARD_LIST[id]);
     delete clone.CONNECTED_SOCKETS;
+    delete clone.logicInterval;
+    console.log(clone);
     fs.writeFile(
         "./boards/board_" + String(id) + ".txt",
         
@@ -92,7 +94,7 @@ var saveBoard = (id) => {
     );
 }
 
-// Loads boards from /boards directory
+// Loads boards from /boards directory into BOARD_LIST
 var loadBoards = () => {
     console.log('Loading Files...')
     fs.readdir(
@@ -139,6 +141,7 @@ var sendBoards = () => {
     }
 }
 
+/// DEBUG Console code !!Dangerous!! ///
 const readline = require('readline').createInterface({
     input: process.stdin,
     output: process.stdout
@@ -154,22 +157,27 @@ var consoleInput = () => {
     })
 }
 consoleInput();
+/////////////////////////////////////////
 
+// Main Client/Server interaction 
 io.on('connection', function (socket) {
-    socket.id = Math.random();
-    SOCKET_LIST[socket.id] = socket;
-    socket.boardID = Object.keys(BOARD_LIST)[0];
-    BOARD_LIST[socket.boardID].CONNECTED_SOCKETS[socket.id] = socket;
+    socket.id = Math.random(); // Give user a random identifier
+    SOCKET_LIST[socket.id] = socket; // Add to list 
+    socket.boardID = Object.keys(BOARD_LIST)[0]; // Give them their starting board
+    BOARD_LIST[socket.boardID].CONNECTED_SOCKETS[socket.id] = socket; // Tell the board where they are
     console.log('-----------------------------')
     console.log('Connected Users: ', Object.keys(SOCKET_LIST).length);
     console.log('Board_List length: ', Object.keys(BOARD_LIST).length);
     console.log('----------------------------')
     
+    // List of ids and corresponding board names to keep track of
     IDS = Object.keys(BOARD_LIST);
     NAMES = [];
     for(id in IDS){
         NAMES.push(BOARD_LIST[IDS[id]].name);
     }
+
+    // Sends whole board with meta data
     socket.emit('initData', {
         w: BOARD_LIST[socket.boardID].width,
         h: BOARD_LIST[socket.boardID].height,
@@ -180,6 +188,7 @@ io.on('connection', function (socket) {
         curr_id: socket.boardID
     })
 
+    // User clicked, change square and send back the new grid
     socket.on('click', function (data) {
         if (data.y < BOARD_LIST[socket.boardID].grid.length && data.x < BOARD_LIST[socket.boardID].grid[0].length) {
             BOARD_LIST[socket.boardID].grid[data.y][data.x] = data.tool;
@@ -190,6 +199,7 @@ io.on('connection', function (socket) {
         })
     })
 
+    // User started/stopped the board, update state
     socket.on('startStop', function (data) {
         if (data.data == 'start') {
             BOARD_LIST[socket.boardID].paused = false;
@@ -200,6 +210,7 @@ io.on('connection', function (socket) {
 
     })
 
+    // User changed the speed input slider, update board tickrate
     socket.on('speed', function (data) {
         BOARD_LIST[socket.boardID].tickSpeed = data.speed * BOARD_LIST[socket.boardID].tickReductionRatio;
         //console.log(BOARD_LIST[socket.boardID].tickSpeed);
@@ -208,14 +219,16 @@ io.on('connection', function (socket) {
         startBoard(BOARD_LIST[socket.boardID]);
     })
 
+    // User requests a different board
     socket.on('changeBoard', function (data){
-        delete BOARD_LIST[socket.boardID].CONNECTED_SOCKETS[socket.id];
+        delete BOARD_LIST[socket.boardID].CONNECTED_SOCKETS[socket.id]; // Remove their socket from the boards connected sockets
         //Check if board just left is empty, pause if it is
         if(Object.keys(BOARD_LIST[socket.boardID].CONNECTED_SOCKETS).length == 0){
             BOARD_LIST[socket.boardID].paused = true;
         }
         socket.boardID = data.id;
-        BOARD_LIST[socket.boardID].CONNECTED_SOCKETS[socket.id] = socket; 
+        BOARD_LIST[socket.boardID].CONNECTED_SOCKETS[socket.id] = socket; // Add socket to new board id
+        // Send full data for new board, first time only
         socket.emit(('initData'), {
             w: BOARD_LIST[socket.boardID].width,
             h: BOARD_LIST[socket.boardID].height,
@@ -227,12 +240,13 @@ io.on('connection', function (socket) {
         })
     })
 
+    // Save board to file
     socket.on('saveBoard', function(data){
         console.log("SAVING BOARD ",socket.boardID,"...")
         saveBoard(socket.boardID);
     })
 
-    // Breaks logic on default board when new board is created
+    // create a new board, basic input sanitization
     socket.on('newBoard', function(data){
         let h = data.height;
         let w = data.width;
@@ -253,7 +267,7 @@ io.on('connection', function (socket) {
         //startBoard(BOARD_LIST[socket.boardID])
     })
 
-
+    // Remove sockets information when they disconnect
     socket.on('disconnect', function () {
         delete BOARD_LIST[socket.boardID].CONNECTED_SOCKETS[socket.id]
         delete SOCKET_LIST[socket.id];
