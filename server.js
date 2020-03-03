@@ -155,27 +155,27 @@ var saveBoard = (id) => {
 var loadBoards = () => {
     console.log('Loading Files...')
     ///////////////// Old File Loading Method //////////////
-    fs.readdir(
-        './boards',
-        (err, files) => {
-            if (err) throw err;
-            console.log("\t",files);
-            for (file in files) {
-                fs.readFile(
-                    "./boards/" + files[file],
-                    (err, data) => {
-                        if (err) throw err;
-                        var board = new Board('', 1, 1, 1);
-                        var parsedData = JSON.parse(data);
-                        Object.assign(board, parsedData)
-                        BOARD_LIST[board.id] = board;
-                        BOARD_LIST[board.id].paused = true;
-                        startBoard(BOARD_LIST[board.id]);
-                    }
-                )
-            }          
-        }
-    )
+    // fs.readdir(
+    //     './boards',
+    //     (err, files) => {
+    //         if (err) throw err;
+    //         console.log("\t",files);
+    //         for (file in files) {
+    //             fs.readFile(
+    //                 "./boards/" + files[file],
+    //                 (err, data) => {
+    //                     if (err) throw err;
+    //                     var board = new Board('', 1, 1, 1);
+    //                     var parsedData = JSON.parse(data);
+    //                     Object.assign(board, parsedData)
+    //                     BOARD_LIST[board.id] = board;
+    //                     BOARD_LIST[board.id].paused = true;
+    //                     startBoard(BOARD_LIST[board.id]);
+    //                 }
+    //             )
+    //         }          
+    //     }
+    // )
     ///////////////////////////////////////////////////////
 
     BoardModel.find(function(err, boards){
