@@ -37,10 +37,10 @@ It follows four basic rules each tick:
 | ---      |  ---    |
 |Drag Drawing| Funcional|
 |Drag 'n Drop| Planned|
-|___Database Connection___| |
-|DB Load/Save Boards| Local directory saving,loading,newboard working|
-|DB Sign in/up| Planned|
+|___Database Connection___| DB connected|
+|DB Load/Save Boards| Database saving working, loading in progress|
+|oAuth2 googleSign in/up| Planned|
 |Multiple simultanious Boards updating| Working|
 |Better Pan / Zoom| Planned|
 |Chat functionality|Planned|
-|Intro / Rules List|Planned|
+|Intro / Rules List|Started|
