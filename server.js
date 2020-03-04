@@ -47,12 +47,12 @@ var BOARD_LIST = {};
 var IDS = [];
 var NAMES = [];
 
-var WIDTH = 1000;
-var HEIGHT = 600;
-var MAX_WIDTH = 3000;
-var MAX_HEIGHT = 3000;
+var WIDTH = 30;
+var HEIGHT = 30;
+var MAX_WIDTH = 100;
+var MAX_HEIGHT = 100;
 var MAX_NAME = 20;
-var cellSize = 20;
+var cellSize = 15;
 
 //start all boards
 var startBoards = (boards) => {
@@ -92,7 +92,6 @@ BOARD_LIST[defaultBoardID].grid[8][10] = 1;
 BOARD_LIST[defaultBoardID].grid[8][11] = 1;
 BOARD_LIST[defaultBoardID].grid[8][12] = 1;
 BOARD_LIST[defaultBoardID].grid[8][13] = 1;
-
 
 // Saves the current boards to /boards/board_<ID> and database
 var saveAllBoards = () => {
@@ -189,10 +188,9 @@ var loadBoards = () => {
             newBoard.tickReductionRatio = board.tickReductionRatio;
             BOARD_LIST[board.id] = newBoard;
             BOARD_LIST[board.id].paused = true;
-            console.log("Type of: ",typeof(board));
-            console.log(board);
             startBoard(BOARD_LIST[board.id]);
         }
+
     });
 }
 loadBoards();
@@ -358,7 +356,8 @@ setInterval(function () {
             var socket = board.CONNECTED_SOCKETS[id];
             socket.emit('boardData', {
                 board: BOARD_LIST[socket.boardID].grid,
-                speed: (BOARD_LIST[socket.boardID].tickSpeed / BOARD_LIST[socket.boardID].tickReductionRatio)
+                speed: (BOARD_LIST[socket.boardID].tickSpeed / BOARD_LIST[socket.boardID].tickReductionRatio),
+                users: Object.keys(BOARD_LIST[socket.boardID].CONNECTED_SOCKETS).length
             })
         }
     }

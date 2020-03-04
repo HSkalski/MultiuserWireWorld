@@ -4,11 +4,11 @@ class Board {
     constructor(n, h, w, cs) {
         this.name = n;
         this.id = Math.random();
-        this.height = h;
-        this.width = w;
+        this.height = parseInt(h);
+        this.width = parseInt(w);
         this.cellSize = cs;
-        this.boardWidth = parseInt(w / cs);
-        this.boardHeight = parseInt(h / cs);
+        //this.boardWidth = parseInt(w);
+        //this.boardHeight = parseInt(h);
         this.paused = false;
 
         this.logicInterval;
@@ -20,10 +20,10 @@ class Board {
         
         this.CONNECTED_SOCKETS = {}
 
-        this.grid = new Array(this.boardHeight);
+        this.grid = new Array(this.height);
         //console.log("Board Height: ", this.grid.length)
-        for (var i = 0; i < this.height / this.cellSize; i++) {
-            this.grid[i] = new Array(this.boardWidth).fill(0);
+        for (var i = 0; i < this.height; i++) {
+            this.grid[i] = new Array(this.width).fill(0);
         }
         //console.log("Board Width: ", this.grid[0].length);
     }
@@ -103,17 +103,17 @@ class Board {
         var nbors = new Array(8);
         if (y > 0)
             nbors[0] = currBoard[y - 1][x]
-        if (x < this.boardWidth-1)
+        if (x < this.width-1)
             nbors[1] = currBoard[y][x + 1]
-        if (y < this.boardHeight-1)
+        if (y < this.height-1)
             nbors[2] = currBoard[y + 1][x]
         if (x > 0)
             nbors[3] = currBoard[y][x - 1]
-        if (x < this.boardWidth-1 && y > 0)
+        if (x < this.width-1 && y > 0)
             nbors[4] = currBoard[y - 1][x + 1]
-        if (x < this.boardWidth-1 && y < this.boardHeight-1)
+        if (x < this.width-1 && y < this.height-1)
             nbors[5] = currBoard[y + 1][x + 1]
-        if (x > 0 && y < this.boardHeight-1)
+        if (x > 0 && y < this.height-1)
             nbors[6] = currBoard[y + 1][x - 1]
         if (x > 0 && y > 0)
             nbors[7] = currBoard[y - 1][x - 1]

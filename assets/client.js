@@ -19,8 +19,11 @@ var drawing = false;
 var lastPos = {x:0,y:0};
 var grid = [];
 var slider = document.getElementById("speedRange")
-// slider.style.display = "none";
+var userCount = 0;
+var userText = document.getElementById("user-count");
 
+
+// slider.style.display = "none";
 var boards = []
 var names = []
 
@@ -33,9 +36,9 @@ newBoardSubmission.style.display = "none";
 // First board sent with additional params
 socket.on('initData', function(data){
     console.log(data)
-    c.width = data.w;
-    c.height = data.h;
     cs = data.cs;
+    c.width = parseInt(data.w*cs);
+    c.height = parseInt(data.h*cs);
     drawBoard(data.board);
     grid = data.board;
     boards = data.all_board_ids;
@@ -58,6 +61,10 @@ socket.on('boardData', function(data){
     drawBoard(data.board);
     grid = data.board;
     slider.value = data.speed;
+    if(data.users != null){
+        userCount = data.users;
+    }
+    userText.innerHTML = "Connected Users: " + userCount;
 })
 
 slider.oninput = function(){
