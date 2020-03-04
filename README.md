@@ -45,3 +45,8 @@ It follows four basic rules each tick:
 |Better Pan / Zoom| Planned|
 |Chat functionality|Planned|
 |Intro / Rules List|Started|
+
+| Longer Term Goals | |
+| --- | --- |
+| Support logic and for larger board sizes, offload to client |  |
+| Expand user functionality | dont list boards, instead join by a code for collaboration |
