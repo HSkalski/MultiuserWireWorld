@@ -54,6 +54,9 @@ var MAX_HEIGHT = 100;
 var MAX_NAME = 20;
 var cellSize = 15;
 
+
+
+
 //start all boards
 var startBoards = (boards) => {
     for (id in boards) {
@@ -65,6 +68,19 @@ var startBoard = (board) => {
     board.logicFunction = () =>{
         board.logicInterval = setInterval(function () {
             board.update();
+
+            ///// Experimental board sending method /////
+            if(!board.paused){
+                for(socket_id in board.CONNECTED_SOCKETS){
+                    socket = board.CONNECTED_SOCKETS[socket_id];
+                    socket.emit('boardData', {
+                        board: BOARD_LIST[socket.boardID].grid,
+                        speed: (BOARD_LIST[socket.boardID].tickSpeed / BOARD_LIST[socket.boardID].tickReductionRatio),
+                        users: Object.keys(BOARD_LIST[socket.boardID].CONNECTED_SOCKETS).length
+                    })
+                }
+            }
+
         }, 1000 / board.tickSpeed)
     }
     board.logicFunction()
@@ -348,19 +364,19 @@ io.on('connection', function (socket) {
     })
 });
 
-// Send correct board states to clients
-setInterval(function () {
-    for(var i in BOARD_LIST){
-        var board = BOARD_LIST[i]
-        for(id in board.CONNECTED_SOCKETS){
-            var socket = board.CONNECTED_SOCKETS[id];
-            socket.emit('boardData', {
-                board: BOARD_LIST[socket.boardID].grid,
-                speed: (BOARD_LIST[socket.boardID].tickSpeed / BOARD_LIST[socket.boardID].tickReductionRatio),
-                users: Object.keys(BOARD_LIST[socket.boardID].CONNECTED_SOCKETS).length
-            })
-        }
-    }
-}, 1000 / 24)
+// Send correct board states to clients //// OLD METHOD - Sending at a constant tickrate
+// setInterval(function () {
+//     for(var i in BOARD_LIST){
+//         var board = BOARD_LIST[i]
+//         for(id in board.CONNECTED_SOCKETS){
+//             var socket = board.CONNECTED_SOCKETS[id];
+//             socket.emit('boardData', {
+//                 board: BOARD_LIST[socket.boardID].grid,
+//                 speed: (BOARD_LIST[socket.boardID].tickSpeed / BOARD_LIST[socket.boardID].tickReductionRatio),
+//                 users: Object.keys(BOARD_LIST[socket.boardID].CONNECTED_SOCKETS).length
+//             })
+//         }
+//     }
+// }, 1000 / 24)
 
 

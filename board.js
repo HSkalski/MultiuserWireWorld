@@ -26,6 +26,24 @@ class Board {
             this.grid[i] = new Array(this.width).fill(0);
         }
         //console.log("Board Width: ", this.grid[0].length);
+
+        // object containing arrays of just the values needed to render the board,
+        //  assumes that all non mentioned coords are empty
+        //  attempt to reduce potential data transfer over socket bottleneck
+        var compressedGrid = {
+            wire: {
+                x: [],
+                y: []
+            },
+            head: {
+                x: [],
+                y: []
+            },
+            tail: {
+                x: [],
+                y: []
+            }
+        };
     }
     
 
