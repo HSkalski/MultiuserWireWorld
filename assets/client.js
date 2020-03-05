@@ -35,7 +35,7 @@ newBoardSubmission.style.display = "none";
 
 // First board sent with additional params
 socket.on('initData', function(data){
-    console.log(data)
+    //console.log(data)
     cs = data.cs;
     c.width = parseInt(data.w*cs);
     c.height = parseInt(data.h*cs);
@@ -59,12 +59,14 @@ socket.on('initData', function(data){
 // Subsequent boards 
 socket.on('boardData', function(data){
     drawCompressedBoard(data.compressedBoard);
+    console.log(data.compressedBoard);
     grid = data.board;
     slider.value = data.speed;
-    if(data.users != null){
-        userCount = data.users;
-    }
-    userText.innerHTML = "Connected Users: " + userCount;
+})
+
+socket.on('changeUserCount', function(data){
+    userCount = data.users;
+    userText.innerHTML = "Users: " + userCount;
 })
 
 slider.oninput = function(){
@@ -200,7 +202,7 @@ function newBoard(){
     var name = document.getElementById("name");
     var height = document.getElementById("height");
     var width = document.getElementById("width");
-    console.log(name.value," ", height.value," ", width.value)
+    //console.log(name.value," ", height.value," ", width.value)
     socket.emit('newBoard',{
         name: name.value,
         height: height.value,
@@ -226,7 +228,7 @@ c.addEventListener('mousemove', function(e) {
 });
 
 document.addEventListener("keydown", function(e){
-    console.log(e);
+    //console.log(e);
     switch(e.keyCode){
         case 72:
             swapTool('Head');

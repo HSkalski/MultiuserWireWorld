@@ -48,8 +48,8 @@ var BOARD_LIST = {};
 var IDS = [];
 var NAMES = [];
 
-var WIDTH = 30;
-var HEIGHT = 30;
+var WIDTH = 25;
+var HEIGHT = 25;
 var MAX_WIDTH = 100;
 var MAX_HEIGHT = 100;
 var MAX_NAME = 20;
@@ -270,7 +270,7 @@ io.on('connection', function (socket) {
     for(id in IDS){
         NAMES.push(BOARD_LIST[IDS[id]].name);
     }
-
+    socket.emit('changeUserCount',{ users: Object.keys(BOARD_LIST[socket.boardID].CONNECTED_SOCKETS).length})
     // Sends whole board with meta data
     socket.emit('initData', {
         w: BOARD_LIST[socket.boardID].width,
@@ -316,12 +316,20 @@ io.on('connection', function (socket) {
     // User requests a different board
     socket.on('changeBoard', function (data){
         delete BOARD_LIST[socket.boardID].CONNECTED_SOCKETS[socket.id]; // Remove their socket from the boards connected sockets
+        for(socket_id in BOARD_LIST[socket.boardID].CONNECTED_SOCKETS){
+            SOCKET_LIST[socket_id].emit(('changeUserCount'), { users: Object.keys(BOARD_LIST[socket.boardID].CONNECTED_SOCKETS).length});
+        }
         //Check if board just left is empty, pause if it is
         if(Object.keys(BOARD_LIST[socket.boardID].CONNECTED_SOCKETS).length == 0){
             BOARD_LIST[socket.boardID].paused = true;
         }
         socket.boardID = data.id;
         BOARD_LIST[socket.boardID].CONNECTED_SOCKETS[socket.id] = socket; // Add socket to new board id
+
+        for(socket_id in BOARD_LIST[socket.boardID].CONNECTED_SOCKETS){
+            SOCKET_LIST[socket_id].emit(('changeUserCount'), { users: Object.keys(BOARD_LIST[socket.boardID].CONNECTED_SOCKETS).length});
+        }
+
         // Send full data for new board, first time only
         socket.emit(('initData'), {
             w: BOARD_LIST[socket.boardID].width,
