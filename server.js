@@ -72,13 +72,14 @@ var startBoard = (board) => {
             //console.log(board.compressedGrid)
 
             ///// Experimental board sending method /////
+            /// Issues: 
+            //     Doesn't send board updates when clicked, needs separate non updating function to recompute compressed data
             if(!board.paused){
                 for(socket_id in board.CONNECTED_SOCKETS){
                     socket = board.CONNECTED_SOCKETS[socket_id];
                     socket.emit('boardData', {
                         compressedBoard: BOARD_LIST[socket.boardID].compressedGrid,
                         speed: (BOARD_LIST[socket.boardID].tickSpeed / BOARD_LIST[socket.boardID].tickReductionRatio),
-                        users: Object.keys(BOARD_LIST[socket.boardID].CONNECTED_SOCKETS).length
                     })
                 }
             }
@@ -287,12 +288,13 @@ io.on('connection', function (socket) {
         if (data.y < BOARD_LIST[socket.boardID].grid.length && data.x < BOARD_LIST[socket.boardID].grid[0].length) {
             BOARD_LIST[socket.boardID].grid[data.y][data.x] = data.tool;
         }
-
+        //console.log(BOARD_LIST[socket.boardID].compressedGrid);
+        
         socket.emit('boardData', {
             compressedBoard: BOARD_LIST[socket.boardID].compressedGrid,
         })
     })
-
+    
     // User started/stopped the board, update state
     socket.on('startStop', function (data) {
         if (data.data == 'start') {

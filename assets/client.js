@@ -62,6 +62,7 @@ socket.on('boardData', function(data){
     console.log(data.compressedBoard);
     grid = data.board;
     if(data.speed) slider.value = data.speed;
+    if(data.test) console.log("clicked")
 })
 
 socket.on('changeUserCount', function(data){
