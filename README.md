@@ -50,8 +50,9 @@ It follows four basic rules each tick:
 | --- | --- |
 |Only send the wires, heads, and tails instead of whole board grid, allows for larger board sizes, however worst case is still sending the whole board | Implemented |
 | Send the difference in boards, send whole board every once in a while to account for desync | Planned |
+| offload logic to client, send less data, only sending sync frames in case of inconsistency|  |
 
 | Longer Term Goals | |
 | --- | --- |
-| Support logic and for larger board sizes, offload to client |  |
+
 | Expand user functionality | dont list boards, instead join by a code for collaboration |
