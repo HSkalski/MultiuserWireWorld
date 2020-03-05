@@ -61,7 +61,7 @@ socket.on('boardData', function(data){
     drawCompressedBoard(data.compressedBoard);
     console.log(data.compressedBoard);
     grid = data.board;
-    slider.value = data.speed;
+    if(data.speed) slider.value = data.speed;
 })
 
 socket.on('changeUserCount', function(data){
