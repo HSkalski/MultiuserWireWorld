@@ -39,7 +39,7 @@ socket.on('initData', function(data){
     cs = data.cs;
     c.width = parseInt(data.w*cs);
     c.height = parseInt(data.h*cs);
-    drawBoard(data.board);
+    drawCompressedBoard(data.compressedBoard);
     grid = data.board;
     boards = data.all_board_ids;
     names = data.all_board_names;
@@ -58,7 +58,7 @@ socket.on('initData', function(data){
 
 // Subsequent boards 
 socket.on('boardData', function(data){
-    drawBoard(data.board);
+    drawCompressedBoard(data.compressedBoard);
     grid = data.board;
     slider.value = data.speed;
     if(data.users != null){
@@ -70,21 +70,50 @@ socket.on('boardData', function(data){
 slider.oninput = function(){
     socket.emit('speed',{speed:slider.value})
 }
+////////// OLD METHOD OF DRAWING WHOLE BOARD //////////
+// var drawBoard = function(board){
+//     for(var y = 0; y <= board.length-1; y += 1){
+//       for(var x = 0; x <= board[0].length-1; x += 1){
+//         ctx.beginPath();
+//         ctx.rect(x*cs,y*cs,cs,cs);
+//         ctx.fillStyle=color[board[y][x]];
+//         ctx.fill();
+//       }
+//     }
+//     ctx.beginPath();
 
-var drawBoard = function(board){
-    for(var y = 0; y <= board.length-1; y += 1){
-      for(var x = 0; x <= board[0].length-1; x += 1){
-        ctx.beginPath();
-        ctx.rect(x*cs,y*cs,cs,cs);
-        ctx.fillStyle=color[board[y][x]];
-        ctx.fill();
-      }
-    }
+
+//   ctx.strokeStyle = "black";
+//   ctx.stroke();
+// }
+////////////////////////////////////////////////////////
+
+var drawCompressedBoard = function(compressedBoard){
     ctx.beginPath();
-
-
-  ctx.strokeStyle = "black";
-  ctx.stroke();
+    ctx.rect(0,0,bw*cs,bh*cs);
+    ctx.fillStyle=color[0];
+    ctx.fill();
+    wLen = compressedBoard.wire.x.length;
+    hLen = compressedBoard.head.x.length;
+    tLen = compressedBoard.tail.x.length;
+    for(var i = 0; i < wLen; i++){
+        ctx.beginPath();
+        ctx.rect(compressedBoard.wire.x[i]*cs,compressedBoard.wire.y[i]*cs,cs,cs);
+        ctx.fillStyle=color[1];
+        ctx.fill();
+    }
+    for(var i = 0; i < hLen; i++){
+        ctx.beginPath();
+        ctx.rect(compressedBoard.head.x[i]*cs,compressedBoard.head.y[i]*cs,cs,cs);
+        ctx.fillStyle=color[2];
+        ctx.fill();
+    }
+    for(var i = 0; i < tLen; i++){
+        ctx.beginPath();
+        ctx.rect(compressedBoard.tail.x[i]*cs,compressedBoard.tail.y[i]*cs,cs,cs);
+        ctx.fillStyle=color[3];
+        ctx.fill();
+    }
 }
 
 var swapTool = function(tool){
@@ -117,21 +146,27 @@ function getMousePosition(canvas, event) {
     let y = event.clientY - rect.top; 
     let gridX = parseInt(x/cs);
     let gridY = parseInt(y/cs);
-    if(uniqueCell(gridX,gridY)){
+    //if(uniqueCell(gridX,gridY)){               // Taken out until function is updated
         // console.log("Coordinate x: " + gridX,  
         //             "Coordinate y: " + gridY); 
-        socket.emit('click', {
-            x:gridX,
-            y:gridY,
-            tool:playerTool
-        });
-    }
+    socket.emit('click', {
+        x:gridX,
+        y:gridY,
+        tool:playerTool
+    });
+    //}
 } 
 
+function checkValue(val){
+    return v;
+}
+
+//////// Function needs to be updated to use compressed grid ////////
 function uniqueCell(x,y){
     // console.log("X: ", x," ", lastPos.x)
     // console.log("Y: ", y," ", lastPos.y)
     // console.log(grid[y][x],' ', playerTool)
+
     if(grid[y][x] != playerTool){
         lastPos.x = x;
         lastPos.y = y;

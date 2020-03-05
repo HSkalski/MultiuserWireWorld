@@ -30,7 +30,7 @@ class Board {
         // object containing arrays of just the values needed to render the board,
         //  assumes that all non mentioned coords are empty
         //  attempt to reduce potential data transfer over socket bottleneck
-        var compressedGrid = {
+        this.compressedGrid = {
             wire: {
                 x: [],
                 y: []
@@ -67,13 +67,18 @@ class Board {
    update() {
        if (!this.paused) {
            var boardCopy = this.arrayClone(this.grid);
+           this.emptyCompressedGrid();
            for (var y = 0; y < boardCopy.length; y++) {
                for (var x = 0; x < boardCopy[0].length; x++) {
                    if (boardCopy[y][x] == 2) {
                        this.grid[y][x] = 3;
+                       this.compressedGrid.tail.x.push(x);
+                       this.compressedGrid.tail.y.push(y);
                     }
                     else if (boardCopy[y][x] == 3) {
                         this.grid[y][x] = 1;
+                        this.compressedGrid.wire.x.push(x);
+                        this.compressedGrid.wire.y.push(y);
                     }
                     else if (boardCopy[y][x] == 1) {
                         this.nborType = this.getNeighbors(x, y, boardCopy);
@@ -82,9 +87,19 @@ class Board {
                             if (this.nborType[i] == 2) { // If neighbor is head
                                 numHeads++;
                             }
+                            if(numHeads >= 3){
+                                break;
+                            }
                         }
                         if (numHeads > 0 && numHeads < 3) {
                             this.grid[y][x] = 2;
+                            this.compressedGrid.head.x.push(x);
+                            this.compressedGrid.head.y.push(y);
+                        }
+                        else{
+                            this.compressedGrid.wire.x.push(x);
+                            this.compressedGrid.wire.y.push(y);
+
                         }
                     }
                 }
@@ -136,6 +151,15 @@ class Board {
         if (x > 0 && y > 0)
             nbors[7] = currBoard[y - 1][x - 1]
         return nbors;
+    }
+
+    emptyCompressedGrid(){
+        this.compressedGrid.wire.x = [];
+        this.compressedGrid.wire.y = [];
+        this.compressedGrid.head.x = [];
+        this.compressedGrid.head.y = [];
+        this.compressedGrid.tail.x = [];
+        this.compressedGrid.tail.y = [];
     }
     
 }

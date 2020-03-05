@@ -21,7 +21,8 @@ var boardSchema = new mongoose.Schema({
     cellSize: Number,
     tickSpeed: Number,
     tickReductionRatio: Number,
-    grid: Array
+    grid: Array,
+    compressedGrid: Object
 });
 var BoardModel = mongoose.model('BoardModel',boardSchema);
 
@@ -68,13 +69,14 @@ var startBoard = (board) => {
     board.logicFunction = () =>{
         board.logicInterval = setInterval(function () {
             board.update();
+            //console.log(board.compressedGrid)
 
             ///// Experimental board sending method /////
             if(!board.paused){
                 for(socket_id in board.CONNECTED_SOCKETS){
                     socket = board.CONNECTED_SOCKETS[socket_id];
                     socket.emit('boardData', {
-                        board: BOARD_LIST[socket.boardID].grid,
+                        compressedBoard: BOARD_LIST[socket.boardID].compressedGrid,
                         speed: (BOARD_LIST[socket.boardID].tickSpeed / BOARD_LIST[socket.boardID].tickReductionRatio),
                         users: Object.keys(BOARD_LIST[socket.boardID].CONNECTED_SOCKETS).length
                     })
@@ -137,7 +139,8 @@ var saveBoard = (id) => {
 
     BoardModel.findOneAndUpdate({id: id}, {
         tickSpeed: BOARD_LIST[id].tickSpeed,
-        grid: BOARD_LIST[id].grid
+        grid: BOARD_LIST[id].grid,
+        compressedGrid:BOARD_LIST[id].compressedGrid
     },{useFindAndModify: false},function(err,doc){
         if(err){console.error(err)};
 
@@ -150,7 +153,8 @@ var saveBoard = (id) => {
                 cellSize: BOARD_LIST[id].cellSize,
                 tickSpeed: BOARD_LIST[id].tickSpeed,
                 tickReductionRatio: BOARD_LIST[id].tickReductionRatio,
-                grid: BOARD_LIST[id].grid
+                grid: BOARD_LIST[id].grid,
+                compressedGrid:BOARD_LIST[id].compressedGrid
             });
             //console.log(save_board);
             save_board.save(function (err, save_board){
@@ -200,13 +204,14 @@ var loadBoards = () => {
             var newBoard = new Board(board.name,board.height,board.width,board.cellSize);
             newBoard.id = board.id;
             newBoard.grid = board.grid;
+            newBoard.compressedGrid = board.compressedGrid;
             newBoard.tickSpeed = board.tickSpeed;
             newBoard.tickReductionRatio = board.tickReductionRatio;
             BOARD_LIST[board.id] = newBoard;
             BOARD_LIST[board.id].paused = true;
             startBoard(BOARD_LIST[board.id]);
         }
-
+        console.log("Boards Loaded!");
     });
 }
 loadBoards();
@@ -221,7 +226,7 @@ var sendBoards = () => {
                 w: BOARD_LIST[socket.boardID].width,
                 h: BOARD_LIST[socket.boardID].height,
                 cs: BOARD_LIST[socket.boardID].cellSize,
-                board: BOARD_LIST[socket.boardID].grid,
+                compressedBoard: BOARD_LIST[socket.boardID].compressedGrid,
                 all_board_ids: IDS,
                 all_board_names: NAMES,
                 curr_id: socket.boardID
@@ -271,7 +276,7 @@ io.on('connection', function (socket) {
         w: BOARD_LIST[socket.boardID].width,
         h: BOARD_LIST[socket.boardID].height,
         cs: BOARD_LIST[socket.boardID].cellSize,
-        board: BOARD_LIST[socket.boardID].grid,
+        compressedBoard: BOARD_LIST[socket.boardID].compressedGrid,
         all_board_ids: IDS,
         all_board_names: NAMES,
         curr_id: socket.boardID
@@ -284,7 +289,7 @@ io.on('connection', function (socket) {
         }
 
         socket.emit('boardData', {
-            board: BOARD_LIST[socket.boardID].grid
+            compressedBoard: BOARD_LIST[socket.boardID].compressedGrid,
         })
     })
 
@@ -322,7 +327,7 @@ io.on('connection', function (socket) {
             w: BOARD_LIST[socket.boardID].width,
             h: BOARD_LIST[socket.boardID].height,
             cs: BOARD_LIST[socket.boardID].cellSize,
-            board: BOARD_LIST[socket.boardID].grid,
+            compressedBoard: BOARD_LIST[socket.boardID].compressedGrid,
             all_board_ids: IDS,
             all_board_names: NAMES,
             curr_id: socket.boardID,
