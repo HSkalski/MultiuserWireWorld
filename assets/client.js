@@ -59,7 +59,7 @@ socket.on('initData', function(data){
 // Subsequent boards 
 socket.on('boardData', function(data){
     drawCompressedBoard(data.compressedBoard);
-    console.log(data.compressedBoard);
+    //console.log(data.compressedBoard);
     grid = data.board;
     if(data.speed) slider.value = data.speed;
     if(data.test) console.log("clicked")
