@@ -6,12 +6,22 @@ var mongoose = require('mongoose');
 
 var fs = require('fs');
 var Board = require('./board.js');
-var config = require('./configs/keys.js')
-
-mongoose.connect(config.mongodb.uri, {
-    useNewUrlParser: true, 
-    useUnifiedTopology: true
-});
+try{
+    var config = require('./configs/keys.js')
+}catch{
+    console.log("config not loaded")
+}
+if(typeof config != "undefined"){
+    mongoose.connect(config.mongodb.uri, {
+        useNewUrlParser: true, 
+        useUnifiedTopology: true
+    });
+}else{
+    mongoose.connect(process.env.DATABASE_URL, {
+        useNewUrlParser: true, 
+        useUnifiedTopology: true
+    });
+}
 
 var boardSchema = new mongoose.Schema({
     name: String,
