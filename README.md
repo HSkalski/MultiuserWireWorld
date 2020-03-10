@@ -54,5 +54,4 @@ It follows four basic rules each tick:
 
 | Longer Term Goals | |
 | --- | --- |
-
 | Expand user functionality | dont list boards, instead join by a code for collaboration |
