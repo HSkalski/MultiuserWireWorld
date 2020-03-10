@@ -345,10 +345,10 @@ io.on('connection', function (socket) {
     })
 
     // Save board to file
-    socket.on('saveBoard', function(data){
-        console.log("SAVING BOARD ",socket.boardID,"...")
-        saveBoard(socket.boardID);
-    })
+    // socket.on('saveBoard', function(data){
+    //     console.log("SAVING BOARD ",socket.boardID,"...")
+    //     saveBoard(socket.boardID);
+    // })
 
     // create a new board, basic input sanitization
     socket.on('newBoard', function(data){
