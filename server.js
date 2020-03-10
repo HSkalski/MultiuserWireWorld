@@ -38,7 +38,7 @@ app.get('/', function (req, res) {
 
 app.use('/assets', express.static(__dirname + '/assets'));
 var PORT = 2000;
-http.listen(PORT);
+http.listen(process.env.PORT || PORT);
 console.log("Server started on port ", PORT);
 
 
