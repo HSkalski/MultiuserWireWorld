@@ -290,9 +290,9 @@ io.on('connection', function (socket) {
         }
         //console.log(BOARD_LIST[socket.boardID].compressedGrid);
         
-        socket.emit('boardData', {
-            compressedBoard: BOARD_LIST[socket.boardID].compressedGrid,
-        })
+        // socket.emit('boardData', {
+        //     compressedBoard: BOARD_LIST[socket.boardID].compressedGrid,
+        // })
     })
     
     // User started/stopped the board, update state
