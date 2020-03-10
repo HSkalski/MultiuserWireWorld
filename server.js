@@ -12,17 +12,17 @@ try{
     console.log("config not loaded")
 }
 console.log("DB URL: ",process.env.DATABASE_URL);
-// if(typeof config != "undefined"){
-//     mongoose.connect(config.mongodb.uri, {
-//         useNewUrlParser: true, 
-//         useUnifiedTopology: true
-//     });
-// }else{
-//     mongoose.connect(process.env.DATABASE_URL, {
-//         useNewUrlParser: true, 
-//         useUnifiedTopology: true
-//     });
-// }
+if(typeof config != "undefined"){
+    mongoose.connect(config.mongodb.uri, {
+        useNewUrlParser: true, 
+        useUnifiedTopology: true
+    });
+}else{
+    mongoose.connect(process.env.DATABASE_URL, {
+        useNewUrlParser: true, 
+        useUnifiedTopology: true
+    });
+}
 
 var boardSchema = new mongoose.Schema({
     name: String,
