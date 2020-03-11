@@ -300,10 +300,12 @@ io.on('connection', function (socket) {
             BOARD_LIST[socket.boardID].grid[data.y][data.x] = data.tool;
         }
         //console.log(BOARD_LIST[socket.boardID].compressedGrid);
-        
-        // socket.emit('boardData', {
-        //     compressedBoard: BOARD_LIST[socket.boardID].compressedGrid,
-        // })
+        BOARD_LIST[socket.boardID].buildCompressedGrid();
+        for(s in BOARD_LIST[socket.boardID].CONNECTED_SOCKETS){
+            SOCKET_LIST[s].emit('boardData', {
+                compressedBoard: BOARD_LIST[socket.boardID].compressedGrid,
+            })
+        }
     })
     
     // User started/stopped the board, update state
@@ -354,33 +356,33 @@ io.on('connection', function (socket) {
             curr_id: socket.boardID,
         })
     })
-//////////////////////////// REMOVED FOR SAFETY OF DEPLOYMENT ////// TEMP //////////
+//////////////////////////// REMOVE FOR SAFETY OF DEPLOYMENT ////// TEMP //////////
     // Save board to file
-    // socket.on('saveBoard', function(data){
-    //     console.log("SAVING BOARD ",socket.boardID,"...")
-    //     saveBoard(socket.boardID);
-    // })
+    socket.on('saveBoard', function(data){
+        console.log("SAVING BOARD ",socket.boardID,"...")
+        saveBoard(socket.boardID);
+    })
 
-    // create a new board, basic input sanitization
-    // socket.on('newBoard', function(data){
-    //     let h = data.height;
-    //     let w = data.width;
-    //     let n = data.name;
-    //     if(h > MAX_HEIGHT){
-    //         h = MAX_HEIGHT;
-    //     }
-    //     if(w > MAX_WIDTH){
-    //         w = MAX_WIDTH;
-    //     }
-    //     if(n.length > MAX_NAME){
-    //         n = n.substring(0,MAX_NAME);
-    //     }
-    //     nBid = createBoard(n, h, w, cellSize);
-    //     IDS = Object.keys(BOARD_LIST);
-    //     NAMES.push(n);
-    //     sendBoards();
-    //     //startBoard(BOARD_LIST[socket.boardID])
-    // })
+    //create a new board, basic input sanitization
+    socket.on('newBoard', function(data){
+        let h = data.height;
+        let w = data.width;
+        let n = data.name;
+        if(h > MAX_HEIGHT){
+            h = MAX_HEIGHT;
+        }
+        if(w > MAX_WIDTH){
+            w = MAX_WIDTH;
+        }
+        if(n.length > MAX_NAME){
+            n = n.substring(0,MAX_NAME);
+        }
+        nBid = createBoard(n, h, w, cellSize);
+        IDS = Object.keys(BOARD_LIST);
+        NAMES.push(n);
+        sendBoards();
+        //startBoard(BOARD_LIST[socket.boardID])
+    })
 ////////////////////////////////////////////////////////////////////////////////
 
     // Remove sockets information when they disconnect
