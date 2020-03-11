@@ -6,12 +6,13 @@ var mongoose = require('mongoose');
 
 var fs = require('fs');
 var Board = require('./board.js');
-try{
-    var config = require('./configs/keys.js')
-}catch{
-    console.log("config not loaded")
-}
+
+try{var config = require('./configs/keys.js')
+}catch{console.log("config not found")}
+
 console.log("DB URL: ",process.env.DATABASE_URL);
+
+// If config is found, it is a local version, else, use heroku env vars
 if(typeof config != "undefined"){
     mongoose.connect(config.mongodb.uri, {
         useNewUrlParser: true, 
