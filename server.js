@@ -6,12 +6,23 @@ var mongoose = require('mongoose');
 
 var fs = require('fs');
 var Board = require('./board.js');
-var config = require('./configs/keys.js')
 
-mongoose.connect(config.mongodb.uri, {
-    useNewUrlParser: true, 
-    useUnifiedTopology: true
-});
+try{var config = require('./configs/keys.js')
+}catch{console.log("config not found")}
+
+
+// If config is found, it is a local version, else, use heroku env vars
+if(typeof config != "undefined"){
+    mongoose.connect(config.mongodb.uri, {
+        useNewUrlParser: true, 
+        useUnifiedTopology: true
+    });
+}else{
+    mongoose.connect(process.env.DATABASE_URL, {
+        useNewUrlParser: true, 
+        useUnifiedTopology: true
+    });
+}
 
 var boardSchema = new mongoose.Schema({
     name: String,
@@ -38,7 +49,7 @@ app.get('/', function (req, res) {
 
 app.use('/assets', express.static(__dirname + '/assets'));
 var PORT = 2000;
-http.listen(PORT);
+http.listen(process.env.PORT || PORT);
 console.log("Server started on port ", PORT);
 
 
@@ -343,33 +354,34 @@ io.on('connection', function (socket) {
             curr_id: socket.boardID,
         })
     })
-
+//////////////////////////// REMOVED FOR SAFETY OF DEPLOYMENT ////// TEMP //////////
     // Save board to file
-    socket.on('saveBoard', function(data){
-        console.log("SAVING BOARD ",socket.boardID,"...")
-        saveBoard(socket.boardID);
-    })
+    // socket.on('saveBoard', function(data){
+    //     console.log("SAVING BOARD ",socket.boardID,"...")
+    //     saveBoard(socket.boardID);
+    // })
 
     // create a new board, basic input sanitization
-    socket.on('newBoard', function(data){
-        let h = data.height;
-        let w = data.width;
-        let n = data.name;
-        if(h > MAX_HEIGHT){
-            h = MAX_HEIGHT;
-        }
-        if(w > MAX_WIDTH){
-            w = MAX_WIDTH;
-        }
-        if(n.length > MAX_NAME){
-            n = n.substring(0,MAX_NAME);
-        }
-        nBid = createBoard(n, h, w, cellSize);
-        IDS = Object.keys(BOARD_LIST);
-        NAMES.push(n);
-        sendBoards();
-        //startBoard(BOARD_LIST[socket.boardID])
-    })
+    // socket.on('newBoard', function(data){
+    //     let h = data.height;
+    //     let w = data.width;
+    //     let n = data.name;
+    //     if(h > MAX_HEIGHT){
+    //         h = MAX_HEIGHT;
+    //     }
+    //     if(w > MAX_WIDTH){
+    //         w = MAX_WIDTH;
+    //     }
+    //     if(n.length > MAX_NAME){
+    //         n = n.substring(0,MAX_NAME);
+    //     }
+    //     nBid = createBoard(n, h, w, cellSize);
+    //     IDS = Object.keys(BOARD_LIST);
+    //     NAMES.push(n);
+    //     sendBoards();
+    //     //startBoard(BOARD_LIST[socket.boardID])
+    // })
+////////////////////////////////////////////////////////////////////////////////
 
     // Remove sockets information when they disconnect
     socket.on('disconnect', function () {
