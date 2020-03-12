@@ -18,6 +18,9 @@ var color={
 };
 var playerTool = 1;
 var drawing = false;
+var selecting = false;
+var selRegion = {};
+
 var lastPos = {x:0,y:0};
 var grid = [];
 var compressedGrid = {};
@@ -102,7 +105,6 @@ var drawCompressedBoard = function(compressedBoard){
     ctx.fill();
 
     if(!topGrid){
-    console.log("grid on bottom");
         for (var i=0; i<c.width/cs-1; i++) {
             for (var j=0; j<c.height/cs-1; j++) {
                 var x = (i+1)*cs;
@@ -140,7 +142,6 @@ var drawCompressedBoard = function(compressedBoard){
     }
 
     if(topGrid){
-        console.log("grid on top");
         for (var i=0; i<c.width/cs-1; i++) {
             for (var j=0; j<c.height/cs-1; j++) {
                 var x = (i+1)*cs;
@@ -154,6 +155,14 @@ var drawCompressedBoard = function(compressedBoard){
             }
         }
     }
+}
+
+var drawSelected = function(){
+    drawCompressedBoard(compressedGrid);
+    ctx.beginPath();
+    ctx.rect((selRegion.x1)*cs,(selRegion.y1)*cs,  (selRegion.x2-selRegion.x1+1)*cs, (selRegion.y2-selRegion.y1+1)*cs)
+    ctx.fillStyle="rgb(255, 255, 255)";
+    ctx.fill();
 }
 
 var swapTool = function(tool){
@@ -191,16 +200,16 @@ function getMousePosition(canvas, event) {
     let y = event.clientY - rect.top; 
     let gridX = parseInt(x/cs);
     let gridY = parseInt(y/cs);
-    //if(uniqueCell(gridX,gridY)){               // Taken out until function is updated
-        // console.log("Coordinate x: " + gridX,  
-        //             "Coordinate y: " + gridY); 
-    socket.emit('click', {
-        x:gridX,
-        y:gridY,
-        tool:playerTool
-    });
-    //}
+    return {x:gridX,y:gridY}
 } 
+
+function emitSquare(x,y){
+    socket.emit('click',{
+        x:x,
+        y:y,
+        tool:playerTool
+    })
+}
 
 function checkValue(val){
     return v;
@@ -256,13 +265,33 @@ function newBoard(){
 var canvasElem = document.querySelector("canvas"); 
   
 c.addEventListener("mousedown", function(e){ 
-    drawing = true;
-    getMousePosition(c, e); 
+    if(e.button == 0){ // Left mouse
+        console.log("left click")
+        drawing = true;
+        pos = getMousePosition(c, e); 
+        emitSquare(pos.x,pos.y);
+    }else if(e.button == 2){ // Right click
+        console.log("right click")
+        selecting = true;
+        pos = getMousePosition(c, e);
+        selRegion.y1 = pos.y;
+        selRegion.x1 = pos.x;
+    }
 }); 
 
 document.addEventListener("mouseup", function(e){ 
     drawing = false;
-    //getMousePosition(c, e); 
+
+    if(selecting){
+        selecting = false;
+        pos = getMousePosition(c, e); 
+        selRegion.y2 = pos.y;
+        selRegion.x2 = pos.x;
+        drawSelected();
+        console.log(selRegion);
+    }
+        
+
 }); 
 
 c.addEventListener('mousemove', function(e) {
