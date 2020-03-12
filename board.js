@@ -105,7 +105,9 @@ class Board {
                 }
             }
         }
-        
+        else{
+            //this.updateCompressedGrid();
+        }
     }
     
     arrayClone(arr) {
@@ -161,7 +163,30 @@ class Board {
         this.compressedGrid.tail.x = [];
         this.compressedGrid.tail.y = [];
     }
-    
+
+    buildCompressedGrid(){
+        this.emptyCompressedGrid();
+        for (var y = 0; y < this.grid.length; y++) {
+            for (var x = 0; x < this.grid[0].length; x++) {
+                switch(this.grid[y][x]){
+                    case 1:
+                        this.compressedGrid.wire.x.push(x);
+                        this.compressedGrid.wire.y.push(y);
+                        break;
+                    case 2:
+                        this.compressedGrid.head.x.push(x);
+                        this.compressedGrid.head.y.push(y);
+                        break;
+                    case 3:
+                        this.compressedGrid.tail.x.push(x);
+                        this.compressedGrid.tail.y.push(y);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
 }
 
 
