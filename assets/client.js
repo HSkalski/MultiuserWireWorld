@@ -13,7 +13,9 @@ var color={
     0:"rgb(20, 0, 100)",
     1:"yellow",
     2:"red",
-    3:"orange"};
+    3:"orange",
+    4:"rgb(10,0,50)"
+};
 var playerTool = 1;
 var drawing = false;
 var lastPos = {x:0,y:0};
@@ -35,7 +37,7 @@ newBoardSubmission.style.display = "none";
 
 // First board sent with additional params
 socket.on('initData', function(data){
-    //console.log(data)
+    console.log(data)
     cs = data.cs;
     c.width = parseInt(data.w*cs);
     c.height = parseInt(data.h*cs);
@@ -93,9 +95,25 @@ slider.oninput = function(){
 
 var drawCompressedBoard = function(compressedBoard){
     ctx.beginPath();
-    ctx.rect(0,0,bw*cs,bh*cs);
+    ctx.rect(0,0,c.width,c.height);
     ctx.fillStyle=color[0];
     ctx.fill();
+    var n = 3
+    console.log(c.width/cs);
+    console.log(c.height/cs);
+    for (var i=0; i<c.width/cs-1; i++) {
+        for (var j=0; j<c.height/cs-1; j++) {
+            var x = (i+1)*cs;
+            var y = (j+1)*cs;
+            var sAngle = 0;
+            var eAngle = 2*Math.PI;
+            ctx.beginPath();
+            ctx.arc(x, y, 1, sAngle, eAngle);
+            ctx.fillStyle=color[4];
+            ctx.fill();
+        }
+    }
+
     wLen = compressedBoard.wire.x.length;
     hLen = compressedBoard.head.x.length;
     tLen = compressedBoard.tail.x.length;
