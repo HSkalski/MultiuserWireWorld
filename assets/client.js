@@ -20,10 +20,11 @@ var playerTool = 1;
 var drawing = false;
 var lastPos = {x:0,y:0};
 var grid = [];
+var compressedGrid = {};
 var slider = document.getElementById("speedRange")
 var userCount = 0;
 var userText = document.getElementById("user-count");
-
+var topGrid = true;
 
 // slider.style.display = "none";
 var boards = []
@@ -41,6 +42,7 @@ socket.on('initData', function(data){
     cs = data.cs;
     c.width = parseInt(data.w*cs);
     c.height = parseInt(data.h*cs);
+    compressedGrid = data.compressedBoard;
     drawCompressedBoard(data.compressedBoard);
     grid = data.board;
     boards = data.all_board_ids;
@@ -98,19 +100,20 @@ var drawCompressedBoard = function(compressedBoard){
     ctx.rect(0,0,c.width,c.height);
     ctx.fillStyle=color[0];
     ctx.fill();
-    var n = 3
-    console.log(c.width/cs);
-    console.log(c.height/cs);
-    for (var i=0; i<c.width/cs-1; i++) {
-        for (var j=0; j<c.height/cs-1; j++) {
-            var x = (i+1)*cs;
-            var y = (j+1)*cs;
-            var sAngle = 0;
-            var eAngle = 2*Math.PI;
-            ctx.beginPath();
-            ctx.arc(x, y, 1, sAngle, eAngle);
-            ctx.fillStyle=color[4];
-            ctx.fill();
+
+    if(!topGrid){
+    console.log("grid on bottom");
+        for (var i=0; i<c.width/cs-1; i++) {
+            for (var j=0; j<c.height/cs-1; j++) {
+                var x = (i+1)*cs;
+                var y = (j+1)*cs;
+                var sAngle = 0;
+                var eAngle = 2*Math.PI;
+                ctx.beginPath();
+                ctx.arc(x, y, 1, sAngle, eAngle);
+                ctx.fillStyle=color[4];
+                ctx.fill();
+            }
         }
     }
 
@@ -135,6 +138,22 @@ var drawCompressedBoard = function(compressedBoard){
         ctx.fillStyle=color[3];
         ctx.fill();
     }
+
+    if(topGrid){
+        console.log("grid on top");
+        for (var i=0; i<c.width/cs-1; i++) {
+            for (var j=0; j<c.height/cs-1; j++) {
+                var x = (i+1)*cs;
+                var y = (j+1)*cs;
+                var sAngle = 0;
+                var eAngle = 2*Math.PI;
+                ctx.beginPath();
+                ctx.arc(x, y, 1, sAngle, eAngle);
+                ctx.fillStyle=color[4];
+                ctx.fill();
+            }
+        }
+    }
 }
 
 var swapTool = function(tool){
@@ -151,6 +170,11 @@ var swapTool = function(tool){
         playerTool = 0;
     }
     document.getElementById("selectedTool").innerHTML = tool;
+}
+
+var swapGrid = function(){
+    topGrid = !topGrid;
+    drawCompressedBoard(compressedGrid);
 }
 
 var startStop = function(data){
