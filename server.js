@@ -370,7 +370,7 @@ io.on('connection', function (socket) {
 
     //create a new board, basic input sanitization
     socket.on('newBoard', function(data){
-        if(Number.isInteger(data.h) && Number.isInteger(data.w)){
+        if(Number.isInteger(parseInt(data.height)) && Number.isInteger(parseInt(data.width))){
             let h = data.height;
             let w = data.width;
             let n = data.name;
