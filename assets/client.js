@@ -25,8 +25,7 @@ var selRegion = {};
 var selGrid = {};
 var selXinv = false;
 var selYinv = false;
-var mouseX = 0;
-var mouseY = 0;
+var mousePos = {x: 0, y: 0};
 
 var lastPos = {x:0,y:0};
 var grid = [];
@@ -89,23 +88,6 @@ socket.on('changeUserCount', function(data){
 slider.oninput = function(){
     socket.emit('speed',{speed:slider.value})
 }
-////////// OLD METHOD OF DRAWING WHOLE BOARD //////////
-// var drawBoard = function(board){
-//     for(var y = 0; y <= board.length-1; y += 1){
-//       for(var x = 0; x <= board[0].length-1; x += 1){
-//         ctx.beginPath();
-//         ctx.rect(x*cs,y*cs,cs,cs);
-//         ctx.fillStyle=color[board[y][x]];
-//         ctx.fill();
-//       }
-//     }
-//     ctx.beginPath();
-
-
-//   ctx.strokeStyle = "black";
-//   ctx.stroke();
-// }
-////////////////////////////////////////////////////////
 
 var drawCompressedBoard = function(compressedBoard){
     ctx.beginPath();
@@ -299,43 +281,39 @@ var drawSelection = function(){
     tLen = selGrid.tail.x.length;
     for(var i = 0; i < wLen; i++){
         ctx.beginPath();
-        ctx.rect((selGrid.wire.x[i]+mouseX-selGrid.wire.x[0])*cs,(selGrid.wire.y[i]+mouseY-selGrid.wire.y[0])*cs,cs,cs);
+        ctx.rect((selGrid.wire.x[i]+mousePos.x-selGrid.wire.x[0])*cs,(selGrid.wire.y[i]+mousePos.y-selGrid.wire.y[0])*cs,cs,cs);
         ctx.fillStyle=color[1];
         ctx.fill();
     }
     for(var i = 0; i < hLen; i++){
         ctx.beginPath();
-        ctx.rect((selGrid.head.x[i]+mouseX-selGrid.wire.x[0])*cs,(selGrid.head.y[i]+mouseY-selGrid.wire.y[0])*cs,cs,cs);
+        ctx.rect((selGrid.head.x[i]+mousePos.x-selGrid.wire.x[0])*cs,(selGrid.head.y[i]+mousePos.y-selGrid.wire.y[0])*cs,cs,cs);
         ctx.fillStyle=color[2];
         ctx.fill();
     }
     for(var i = 0; i < tLen; i++){
         ctx.beginPath();
-        ctx.rect((selGrid.tail.x[i]+mouseX-selGrid.wire.x[0])*cs,(selGrid.tail.y[i]+mouseY-selGrid.wire.y[0])*cs,cs,cs);
+        ctx.rect((selGrid.tail.x[i]+mousePos.x-selGrid.wire.x[0])*cs,(selGrid.tail.y[i]+mousePos.y-selGrid.wire.y[0])*cs,cs,cs);
         ctx.fillStyle=color[3];
         ctx.fill();
     }
     ctx.globalAlpha = 1;
 }
+
 var pasteSelection = function(){
-    wLen = selGrid.wire.x.length;
-    hLen = selGrid.head.x.length;
-    tLen = selGrid.tail.x.length;
-    for(var i = 0; i < wLen; i++){
-
-        emitSquare((selGrid.wire.x[i]+mouseX-selGrid.wire.x[0]),(selGrid.wire.y[i]+mouseY-selGrid.wire.y[0]),1);
-
-    }
-    for(var i = 0; i < hLen; i++){
-
-        emitSquare((selGrid.head.x[i]+mouseX-selGrid.wire.x[0]),(selGrid.head.y[i]+mouseY-selGrid.wire.y[0]),2);
-
-    }
-    for(var i = 0; i < tLen; i++){
-
-        emitSquare((selGrid.tail.x[i]+mouseX-selGrid.wire.x[0]),(selGrid.tail.y[i]+mouseY-selGrid.wire.y[0]),3);
-
-    }
+    socket.emit('paste', {selGrid,mousePos});
+    // wLen = selGrid.wire.x.length;
+    // hLen = selGrid.head.x.length;
+    // tLen = selGrid.tail.x.length;
+    // for(var i = 0; i < wLen; i++){
+    //     emitSquare((selGrid.wire.x[i]+mousePos.x-selGrid.wire.x[0]),(selGrid.wire.y[i]+mousePos.y-selGrid.wire.y[0]),1);
+    // }
+    // for(var i = 0; i < hLen; i++){
+    //     emitSquare((selGrid.head.x[i]+mousePos.x-selGrid.wire.x[0]),(selGrid.head.y[i]+mousePos.y-selGrid.wire.y[0]),2);
+    // }
+    // for(var i = 0; i < tLen; i++){
+    //     emitSquare((selGrid.tail.x[i]+mousePos.x-selGrid.wire.x[0]),(selGrid.tail.y[i]+mousePos.y-selGrid.wire.y[0]),3);
+    // }
 }
 
 var swapTool = function(tool){
@@ -478,23 +456,26 @@ document.addEventListener("mouseup", function(e){
 }); 
 
 c.addEventListener('mousemove', function(e) {
-    if(drawing){
-        pos = getMousePosition(c, e); 
-        emitSquare(pos.x,pos.y,playerTool);
-    }
-    if(selecting){
-        pos = getMousePosition(c, e); 
-        selRegion.y2 = pos.y;
-        selRegion.x2 = pos.x;
-        drawCompressedBoard(compressedGrid);
-    }
-    if(copying){
-        drawCompressedBoard(compressedGrid);
-        pos = getMousePosition(c, e);
-        mouseX = pos.x;
-        mouseY = pos.y;
-        drawSelection();
-    }
+    pos = getMousePosition(c, e);
+    mousePos.x = pos.x;
+    mousePos.y = pos.y;
+    // if(drawing){
+    //     pos = getMousePosition(c, e); 
+    //     emitSquare(pos.x,pos.y,playerTool);
+    // }
+    // if(selecting){
+    //     pos = getMousePosition(c, e); 
+    //     selRegion.y2 = pos.y;
+    //     selRegion.x2 = pos.x;
+    //     drawCompressedBoard(compressedGrid);
+    // }
+    // if(copying){
+    //     drawCompressedBoard(compressedGrid);
+    //     pos = getMousePosition(c, e);
+    //     mouseX = pos.x;
+    //     mouseY = pos.y;
+    //     drawSelection();
+    // }
 });
 
 document.addEventListener("keydown", function(e){
@@ -517,3 +498,21 @@ document.addEventListener("keydown", function(e){
     }
 }, false);
 
+var draw = function(){
+    window.requestAnimationFrame(draw);
+
+    if(drawing){ 
+        emitSquare(mousePos.x,mousePos.y,playerTool);
+    }
+    if(selecting){
+        selRegion.y2 = mousePos.y;
+        selRegion.x2 = mousePos.x;
+        drawCompressedBoard(compressedGrid);
+    }
+    if(copying){
+        drawCompressedBoard(compressedGrid);
+        drawSelection();
+    }
+}
+
+draw();

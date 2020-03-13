@@ -310,6 +310,42 @@ io.on('connection', function (socket) {
             })
         }
     })
+
+    socket.on('paste', function(data){
+        selGrid = data.selGrid;
+        mousePos = data.mousePos;
+        console.log("selGrid: ",selGrid);
+        console.log("mousePos: ",mousePos);
+        wLen = selGrid.wire.x.length;
+        hLen = selGrid.head.x.length;
+        tLen = selGrid.tail.x.length;
+        console.log(wLen, " ", hLen," ",tLen);
+        for(var i = 0; i < wLen; i++){
+
+            if ((selGrid.wire.y[i]+mousePos.y-selGrid.wire.y[0]) < BOARD_LIST[socket.boardID].grid.length && (selGrid.wire.x[i]+mousePos.x-selGrid.wire.x[0]) < BOARD_LIST[socket.boardID].grid[0].length) {
+                BOARD_LIST[socket.boardID].grid[selGrid.wire.y[i]+mousePos.y-selGrid.wire.y[0]][selGrid.wire.x[i]+mousePos.x-selGrid.wire.x[0]] = 1;
+            }
+        }
+        for(var i = 0; i < hLen; i++){
+
+            if ((selGrid.head.y[i]+mousePos.y-selGrid.head.y[0]) < BOARD_LIST[socket.boardID].grid.length && (selGrid.head.x[i]+mousePos.x-selGrid.head.x[0]) < BOARD_LIST[socket.boardID].grid[0].length) {
+                BOARD_LIST[socket.boardID].grid[selGrid.head.y[i]+mousePos.y-selGrid.head.y[0]][selGrid.head.x[i]+mousePos.x-selGrid.head.x[0]] = 1;
+            }
+        }
+        for(var i = 0; i < tLen; i++){
+            if ((selGrid.tail.y[i]+mousePos.y-selGrid.tail.y[0]) < BOARD_LIST[socket.boardID].grid.length && (selGrid.tail.x[i]+mousePos.x-selGrid.tail.x[0]) < BOARD_LIST[socket.boardID].grid[0].length) {
+                console.log(selGrid.tail.y[i]+mousePos.y-selGrid.tail.y[0],' ',selGrid.tail.y[i]+mousePos.y-selGrid.tail.y[0])
+                BOARD_LIST[socket.boardID].grid[selGrid.tail.y[i]+mousePos.y-selGrid.tail.y[0]][selGrid.tail.x[i]+mousePos.x-selGrid.tail.x[0]] = 1;
+            }
+        }
+
+        BOARD_LIST[socket.boardID].buildCompressedGrid();
+        for(s in BOARD_LIST[socket.boardID].CONNECTED_SOCKETS){
+            SOCKET_LIST[s].emit('boardData', {
+                compressedBoard: BOARD_LIST[socket.boardID].compressedGrid,
+            })
+        }
+    })
     
     // User started/stopped the board, update state
     socket.on('startStop', function (data) {
