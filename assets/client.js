@@ -18,6 +18,10 @@ var color={
 };
 var playerTool = 1;
 var drawing = false;
+var selecting = false;
+var copying = false;
+var selRegion = {};
+
 var lastPos = {x:0,y:0};
 var grid = [];
 var compressedGrid = {};
@@ -35,6 +39,7 @@ var newOption = document.createElement("option");
 
 var newBoardSubmission = document.getElementById("newBoardSubmission")
 newBoardSubmission.style.display = "none";
+
 
 // First board sent with additional params
 socket.on('initData', function(data){
@@ -63,6 +68,7 @@ socket.on('initData', function(data){
 // Subsequent boards 
 socket.on('boardData', function(data){
     drawCompressedBoard(data.compressedBoard);
+    compressedGrid = data.compressedBoard;
     //console.log(data.compressedBoard);
     grid = data.board;
     if(data.speed) slider.value = data.speed;
@@ -102,7 +108,6 @@ var drawCompressedBoard = function(compressedBoard){
     ctx.fill();
 
     if(!topGrid){
-    console.log("grid on bottom");
         for (var i=0; i<c.width/cs-1; i++) {
             for (var j=0; j<c.height/cs-1; j++) {
                 var x = (i+1)*cs;
@@ -140,7 +145,6 @@ var drawCompressedBoard = function(compressedBoard){
     }
 
     if(topGrid){
-        console.log("grid on top");
         for (var i=0; i<c.width/cs-1; i++) {
             for (var j=0; j<c.height/cs-1; j++) {
                 var x = (i+1)*cs;
@@ -154,6 +158,26 @@ var drawCompressedBoard = function(compressedBoard){
             }
         }
     }
+    if(selRegion != {}){   
+        drawSelected();
+    }
+}
+
+var drawSelected = function(){
+    ctx.beginPath(); 
+    addOneX = 0;
+    addOneY = 0;
+    if(selRegion.x1>selRegion.x2)
+        addOneX = 1;
+    if(selRegion.y1>selRegion.y2)
+        addOneY = 1;
+    ctx.rect((selRegion.x1+addOneX)*cs,
+            (selRegion.y1+addOneY)*cs,  
+            (selRegion.x2-selRegion.x1+1-(2*addOneX))*cs, 
+            (selRegion.y2-selRegion.y1+1-(2*addOneY))*cs)
+    ctx.lineWidth = "2";
+    ctx.strokeStyle = "white";
+    ctx.stroke();
 }
 
 var swapTool = function(tool){
@@ -191,16 +215,16 @@ function getMousePosition(canvas, event) {
     let y = event.clientY - rect.top; 
     let gridX = parseInt(x/cs);
     let gridY = parseInt(y/cs);
-    //if(uniqueCell(gridX,gridY)){               // Taken out until function is updated
-        // console.log("Coordinate x: " + gridX,  
-        //             "Coordinate y: " + gridY); 
-    socket.emit('click', {
-        x:gridX,
-        y:gridY,
-        tool:playerTool
-    });
-    //}
+    return {x:gridX,y:gridY}
 } 
+
+function emitSquare(x,y){
+    socket.emit('click',{
+        x:x,
+        y:y,
+        tool:playerTool
+    })
+}
 
 function checkValue(val){
     return v;
@@ -256,18 +280,49 @@ function newBoard(){
 var canvasElem = document.querySelector("canvas"); 
   
 c.addEventListener("mousedown", function(e){ 
-    drawing = true;
-    getMousePosition(c, e); 
+    if(e.button == 0 && !copying){ // Left mouse
+        console.log("left click")
+        drawing = true;
+        pos = getMousePosition(c, e); 
+        emitSquare(pos.x,pos.y);
+    }else if(e.button == 2){ // Right click
+        console.log("right click")
+        selecting = true;
+        pos = getMousePosition(c, e);
+        selRegion.y1 = pos.y;
+        selRegion.x1 = pos.x;
+    }
 }); 
 
 document.addEventListener("mouseup", function(e){ 
     drawing = false;
-    //getMousePosition(c, e); 
+
+    if(selecting){
+        selecting = false;
+        copying = true;
+        pos = getMousePosition(c, e); 
+        selRegion.y2 = pos.y;
+        selRegion.x2 = pos.x;
+        if(selRegion.x1 == selRegion.x2 && selRegion.y1 == selRegion.y2){
+            selRegion = {};
+            console.log("Clearing region");
+            copying = false;
+        }
+        drawCompressedBoard(compressedGrid);
+    }
 }); 
 
 c.addEventListener('mousemove', function(e) {
-    if(drawing)
-        getMousePosition(c, e); 
+    if(drawing){
+        pos = getMousePosition(c, e); 
+        emitSquare(pos.x,pos.y);
+    }
+    if(selecting){
+        pos = getMousePosition(c, e); 
+        selRegion.y2 = pos.y;
+        selRegion.x2 = pos.x;
+        drawCompressedBoard(compressedGrid);
+    }
 });
 
 document.addEventListener("keydown", function(e){
