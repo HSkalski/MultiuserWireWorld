@@ -19,6 +19,7 @@ var color={
 var playerTool = 1;
 var drawing = false;
 var selecting = false;
+var copying = false;
 var selRegion = {};
 
 var lastPos = {x:0,y:0};
@@ -38,6 +39,7 @@ var newOption = document.createElement("option");
 
 var newBoardSubmission = document.getElementById("newBoardSubmission")
 newBoardSubmission.style.display = "none";
+
 
 // First board sent with additional params
 socket.on('initData', function(data){
@@ -66,6 +68,7 @@ socket.on('initData', function(data){
 // Subsequent boards 
 socket.on('boardData', function(data){
     drawCompressedBoard(data.compressedBoard);
+    compressedGrid = data.compressedBoard;
     //console.log(data.compressedBoard);
     grid = data.board;
     if(data.speed) slider.value = data.speed;
@@ -155,14 +158,26 @@ var drawCompressedBoard = function(compressedBoard){
             }
         }
     }
+    if(selRegion != {}){   
+        drawSelected();
+    }
 }
 
 var drawSelected = function(){
-    drawCompressedBoard(compressedGrid);
-    ctx.beginPath();
-    ctx.rect((selRegion.x1)*cs,(selRegion.y1)*cs,  (selRegion.x2-selRegion.x1+1)*cs, (selRegion.y2-selRegion.y1+1)*cs)
-    ctx.fillStyle="rgb(255, 255, 255)";
-    ctx.fill();
+    ctx.beginPath(); 
+    addOneX = 0;
+    addOneY = 0;
+    if(selRegion.x1>selRegion.x2)
+        addOneX = 1;
+    if(selRegion.y1>selRegion.y2)
+        addOneY = 1;
+    ctx.rect((selRegion.x1+addOneX)*cs,
+            (selRegion.y1+addOneY)*cs,  
+            (selRegion.x2-selRegion.x1+1-(2*addOneX))*cs, 
+            (selRegion.y2-selRegion.y1+1-(2*addOneY))*cs)
+    ctx.lineWidth = "2";
+    ctx.strokeStyle = "white";
+    ctx.stroke();
 }
 
 var swapTool = function(tool){
@@ -265,7 +280,7 @@ function newBoard(){
 var canvasElem = document.querySelector("canvas"); 
   
 c.addEventListener("mousedown", function(e){ 
-    if(e.button == 0){ // Left mouse
+    if(e.button == 0 && !copying){ // Left mouse
         console.log("left click")
         drawing = true;
         pos = getMousePosition(c, e); 
@@ -284,19 +299,30 @@ document.addEventListener("mouseup", function(e){
 
     if(selecting){
         selecting = false;
+        copying = true;
         pos = getMousePosition(c, e); 
         selRegion.y2 = pos.y;
         selRegion.x2 = pos.x;
-        drawSelected();
-        console.log(selRegion);
+        if(selRegion.x1 == selRegion.x2 && selRegion.y1 == selRegion.y2){
+            selRegion = {};
+            console.log("Clearing region");
+            copying = false;
+        }
+        drawCompressedBoard(compressedGrid);
     }
-        
-
 }); 
 
 c.addEventListener('mousemove', function(e) {
-    if(drawing)
-        getMousePosition(c, e); 
+    if(drawing){
+        pos = getMousePosition(c, e); 
+        emitSquare(pos.x,pos.y);
+    }
+    if(selecting){
+        pos = getMousePosition(c, e); 
+        selRegion.y2 = pos.y;
+        selRegion.x2 = pos.x;
+        drawCompressedBoard(compressedGrid);
+    }
 });
 
 document.addEventListener("keydown", function(e){
