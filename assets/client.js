@@ -18,9 +18,17 @@ var color={
 };
 var playerTool = 1;
 var drawing = false;
+
 var selecting = false;
 var copying = false;
 var selRegion = {};
+var copyColor={
+    0:"rgb(20, 0, 100)",
+    1:"yellow",
+    2:"red",
+    3:"orange",
+    4:"rgb(10,0,50)"
+};
 
 var lastPos = {x:0,y:0};
 var grid = [];
@@ -116,7 +124,8 @@ var drawCompressedBoard = function(compressedBoard){
                 var eAngle = 2*Math.PI;
                 ctx.beginPath();
                 ctx.arc(x, y, 1, sAngle, eAngle);
-                ctx.fillStyle=color[4];
+                ctx.fillStyle="black";
+                // ctx.fillStyle=color[4];
                 ctx.fill();
             }
         }
@@ -125,6 +134,7 @@ var drawCompressedBoard = function(compressedBoard){
     wLen = compressedBoard.wire.x.length;
     hLen = compressedBoard.head.x.length;
     tLen = compressedBoard.tail.x.length;
+    //ctx.globalAlpha = 0.5;
     for(var i = 0; i < wLen; i++){
         ctx.beginPath();
         ctx.rect(compressedBoard.wire.x[i]*cs,compressedBoard.wire.y[i]*cs,cs,cs);
@@ -153,7 +163,8 @@ var drawCompressedBoard = function(compressedBoard){
                 var eAngle = 2*Math.PI;
                 ctx.beginPath();
                 ctx.arc(x, y, 1, sAngle, eAngle);
-                ctx.fillStyle=color[4];
+                ctx.fillStyle="black";
+                // ctx.fillStyle=color[4];
                 ctx.fill();
             }
         }
