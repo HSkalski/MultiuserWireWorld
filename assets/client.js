@@ -22,13 +22,11 @@ var drawing = false;
 var selecting = false;
 var copying = false;
 var selRegion = {};
-var copyColor={
-    0:"rgb(20, 0, 100)",
-    1:"yellow",
-    2:"red",
-    3:"orange",
-    4:"rgb(10,0,50)"
-};
+var selGrid = {};
+var selXinv = false;
+var selYinv = false;
+var mouseX = 0;
+var mouseY = 0;
 
 var lastPos = {x:0,y:0};
 var grid = [];
@@ -172,16 +170,25 @@ var drawCompressedBoard = function(compressedBoard){
     if(selRegion != {}){   
         drawSelected();
     }
+    if(copying){
+        drawSelection();
+    }
 }
 
 var drawSelected = function(){
     ctx.beginPath(); 
     addOneX = 0;
     addOneY = 0;
-    if(selRegion.x1>selRegion.x2)
+    selXinv = false;
+    selYinv = false;
+    if(selRegion.x1>selRegion.x2){
         addOneX = 1;
-    if(selRegion.y1>selRegion.y2)
+        selXinv = true;
+    }
+    if(selRegion.y1>selRegion.y2){
         addOneY = 1;
+        selYinv = true;
+    }
     ctx.rect((selRegion.x1+addOneX)*cs,
             (selRegion.y1+addOneY)*cs,  
             (selRegion.x2-selRegion.x1+1-(2*addOneX))*cs, 
@@ -189,6 +196,146 @@ var drawSelected = function(){
     ctx.lineWidth = "2";
     ctx.strokeStyle = "white";
     ctx.stroke();
+}
+
+var findSelectedGrid = function(){
+    selGrid = {
+        wire: {
+            x: [],
+            y: []
+        },
+        head: {
+            x: [],
+            y: []
+        },
+        tail: {
+            x: [],
+            y: []
+        }
+    }
+    wLen = compressedGrid.wire.x.length;
+    hLen = compressedGrid.head.x.length;
+    tLen = compressedGrid.tail.x.length;
+    //Wire
+    for(var i = 0; i < wLen; i++){
+        //console.log(selGrid);
+        if(!selYinv && !selXinv){ //top down, left to right
+            if(compressedGrid.wire.x[i] >= selRegion.x1 && compressedGrid.wire.x[i] <= selRegion.x2 && compressedGrid.wire.y[i] >= selRegion.y1 && compressedGrid.wire.y[i] <= selRegion.y2){
+                selGrid.wire.x.push(compressedGrid.wire.x[i]);
+                selGrid.wire.y.push(compressedGrid.wire.y[i]);
+            }
+        }else if(!selYinv){ //top down, right to left
+            if(compressedGrid.wire.x[i] <= selRegion.x1 && compressedGrid.wire.x[i] >= selRegion.x2 && compressedGrid.wire.y[i] >= selRegion.y1 && compressedGrid.wire.y[i] <= selRegion.y2){
+                selGrid.wire.x.push(compressedGrid.wire.x[i]);
+                selGrid.wire.y.push(compressedGrid.wire.y[i]);
+            }
+        }else if(!selXinv){ //bottom up, left to right
+            if(compressedGrid.wire.x[i] >= selRegion.x1 && compressedGrid.wire.x[i] <= selRegion.x2 && compressedGrid.wire.y[i] <= selRegion.y1 && compressedGrid.wire.y[i] >= selRegion.y2){
+                selGrid.wire.x.push(compressedGrid.wire.x[i]);
+                selGrid.wire.y.push(compressedGrid.wire.y[i]);
+            }
+        }else{ // bottom up,  right to left
+            if(compressedGrid.wire.x[i] <= selRegion.x1 && compressedGrid.wire.x[i] >= selRegion.x2 && compressedGrid.wire.y[i] <= selRegion.y1 && compressedGrid.wire.y[i] >= selRegion.y2){
+                selGrid.wire.x.push(compressedGrid.wire.x[i]);
+                selGrid.wire.y.push(compressedGrid.wire.y[i]);
+            }
+        }
+    }
+    //Heads
+    for(var i = 0; i < hLen; i++){
+        if(!selYinv && !selXinv){ //top down, left to right
+            if(compressedGrid.head.x[i] >= selRegion.x1 && compressedGrid.head.x[i] <= selRegion.x2 && compressedGrid.head.y[i] >= selRegion.y1 && compressedGrid.head.y[i] <= selRegion.y2){
+                selGrid.head.x.push(compressedGrid.head.x[i]);
+                selGrid.head.y.push(compressedGrid.head.y[i]);
+            }
+        }else if(!selYinv){ //top down, right to left
+            if(compressedGrid.head.x[i] <= selRegion.x1 && compressedGrid.head.x[i] >= selRegion.x2 && compressedGrid.head.y[i] >= selRegion.y1 && compressedGrid.head.y[i] <= selRegion.y2){
+                selGrid.head.x.push(compressedGrid.head.x[i]);
+                selGrid.head.y.push(compressedGrid.head.y[i]);
+            }
+        }else if(!selXinv){ //bottom up, left to right
+            if(compressedGrid.head.x[i] >= selRegion.x1 && compressedGrid.head.x[i] <= selRegion.x2 && compressedGrid.head.y[i] <= selRegion.y1 && compressedGrid.head.y[i] >= selRegion.y2){
+                selGrid.head.x.push(compressedGrid.head.x[i]);
+                selGrid.head.y.push(compressedGrid.head.y[i]);
+            }
+        }else{ // bottom up,  right to left
+            if(compressedGrid.head.x[i] <= selRegion.x1 && compressedGrid.head.x[i] >= selRegion.x2 && compressedGrid.head.y[i] <= selRegion.y1 && compressedGrid.head.y[i] >= selRegion.y2){
+                selGrid.head.x.push(compressedGrid.head.x[i]);
+                selGrid.head.y.push(compressedGrid.head.y[i]);
+            }
+        }
+    }
+    //Tails
+    for(var i = 0; i < tLen; i++){
+        if(!selYinv && !selXinv){ //top down, left to right
+            if(compressedGrid.tail.x[i] >= selRegion.x1 && compressedGrid.tail.x[i] <= selRegion.x2 && compressedGrid.tail.y[i] >= selRegion.y1 && compressedGrid.tail.y[i] <= selRegion.y2){
+                selGrid.tail.x.push(compressedGrid.tail.x[i]);
+                selGrid.tail.y.push(compressedGrid.tail.y[i]);
+            }
+        }else if(!selYinv){ //top down, right to left
+            if(compressedGrid.tail.x[i] <= selRegion.x1 && compressedGrid.tail.x[i] >= selRegion.x2 && compressedGrid.tail.y[i] >= selRegion.y1 && compressedGrid.tail.y[i] <= selRegion.y2){
+                selGrid.tail.x.push(compressedGrid.tail.x[i]);
+                selGrid.tail.y.push(compressedGrid.tail.y[i]);
+            }
+        }else if(!selXinv){ //bottom up, left to right
+            if(compressedGrid.tail.x[i] >= selRegion.x1 && compressedGrid.tail.x[i] <= selRegion.x2 && compressedGrid.tail.y[i] <= selRegion.y1 && compressedGrid.tail.y[i] >= selRegion.y2){
+                selGrid.tail.x.push(compressedGrid.tail.x[i]);
+                selGrid.tail.y.push(compressedGrid.tail.y[i]);
+            }
+        }else{ // bottom up,  right to left
+            if(compressedGrid.tail.x[i] <= selRegion.x1 && compressedGrid.tail.x[i] >= selRegion.x2 && compressedGrid.tail.y[i] <= selRegion.y1 && compressedGrid.tail.y[i] >= selRegion.y2){
+                selGrid.tail.x.push(compressedGrid.tail.x[i]);
+                selGrid.tail.y.push(compressedGrid.tail.y[i]);
+            }
+        }
+    }
+
+}
+
+var drawSelection = function(){
+    ctx.globalAlpha = 0.5;
+    wLen = selGrid.wire.x.length;
+    hLen = selGrid.head.x.length;
+    tLen = selGrid.tail.x.length;
+    for(var i = 0; i < wLen; i++){
+        ctx.beginPath();
+        ctx.rect((selGrid.wire.x[i]+mouseX-selGrid.wire.x[0])*cs,(selGrid.wire.y[i]+mouseY-selGrid.wire.y[0])*cs,cs,cs);
+        ctx.fillStyle=color[1];
+        ctx.fill();
+    }
+    for(var i = 0; i < hLen; i++){
+        ctx.beginPath();
+        ctx.rect((selGrid.head.x[i]+mouseX-selGrid.wire.x[0])*cs,(selGrid.head.y[i]+mouseY-selGrid.wire.y[0])*cs,cs,cs);
+        ctx.fillStyle=color[2];
+        ctx.fill();
+    }
+    for(var i = 0; i < tLen; i++){
+        ctx.beginPath();
+        ctx.rect((selGrid.tail.x[i]+mouseX-selGrid.wire.x[0])*cs,(selGrid.tail.y[i]+mouseY-selGrid.wire.y[0])*cs,cs,cs);
+        ctx.fillStyle=color[3];
+        ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+}
+var pasteSelection = function(){
+    wLen = selGrid.wire.x.length;
+    hLen = selGrid.head.x.length;
+    tLen = selGrid.tail.x.length;
+    for(var i = 0; i < wLen; i++){
+
+        emitSquare((selGrid.wire.x[i]+mouseX-selGrid.wire.x[0]),(selGrid.wire.y[i]+mouseY-selGrid.wire.y[0]),1);
+
+    }
+    for(var i = 0; i < hLen; i++){
+
+        emitSquare((selGrid.head.x[i]+mouseX-selGrid.wire.x[0]),(selGrid.head.y[i]+mouseY-selGrid.wire.y[0]),2);
+
+    }
+    for(var i = 0; i < tLen; i++){
+
+        emitSquare((selGrid.tail.x[i]+mouseX-selGrid.wire.x[0]),(selGrid.tail.y[i]+mouseY-selGrid.wire.y[0]),3);
+
+    }
 }
 
 var swapTool = function(tool){
@@ -229,11 +376,11 @@ function getMousePosition(canvas, event) {
     return {x:gridX,y:gridY}
 } 
 
-function emitSquare(x,y){
+function emitSquare(x,y,tool){
     socket.emit('click',{
         x:x,
         y:y,
-        tool:playerTool
+        tool:tool
     })
 }
 
@@ -291,11 +438,16 @@ function newBoard(){
 var canvasElem = document.querySelector("canvas"); 
   
 c.addEventListener("mousedown", function(e){ 
-    if(e.button == 0 && !copying){ // Left mouse
-        console.log("left click")
-        drawing = true;
-        pos = getMousePosition(c, e); 
-        emitSquare(pos.x,pos.y);
+    if(e.button == 0){ // Left mouse
+        if(!copying){
+            console.log("left click")
+            drawing = true;
+            pos = getMousePosition(c, e); 
+            emitSquare(pos.x,pos.y,playerTool);
+        }else{
+            pasteSelection();
+            
+        }
     }else if(e.button == 2){ // Right click
         console.log("right click")
         selecting = true;
@@ -310,7 +462,6 @@ document.addEventListener("mouseup", function(e){
 
     if(selecting){
         selecting = false;
-        copying = true;
         pos = getMousePosition(c, e); 
         selRegion.y2 = pos.y;
         selRegion.x2 = pos.x;
@@ -320,19 +471,29 @@ document.addEventListener("mouseup", function(e){
             copying = false;
         }
         drawCompressedBoard(compressedGrid);
+        findSelectedGrid();
+        if(selGrid.wire.x.length != 0 || selGrid.head.x.length != 0 || selGrid.tail.x.length != 0)
+            copying = true;
     }
 }); 
 
 c.addEventListener('mousemove', function(e) {
     if(drawing){
         pos = getMousePosition(c, e); 
-        emitSquare(pos.x,pos.y);
+        emitSquare(pos.x,pos.y,playerTool);
     }
     if(selecting){
         pos = getMousePosition(c, e); 
         selRegion.y2 = pos.y;
         selRegion.x2 = pos.x;
         drawCompressedBoard(compressedGrid);
+    }
+    if(copying){
+        drawCompressedBoard(compressedGrid);
+        pos = getMousePosition(c, e);
+        mouseX = pos.x;
+        mouseY = pos.y;
+        drawSelection();
     }
 });
 
