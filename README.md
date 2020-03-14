@@ -37,7 +37,7 @@ It follows four basic rules each tick:
 |Objective |Progress |
 | ---      |  ---    |
 |Drag Drawing| Funcional|
-|Drag 'n Drop| Planned|
+|Drag 'n Drop| First iteration copy paste is in|
 |___Database Connection___| DB connected|
 |DB Load/Save Boards| Database saving and incremental savingworking, loading working|
 |oAuth2 googleSign in/up| Planned|
