@@ -53,7 +53,7 @@ socket.on('initData', function(data){
     c.width = parseInt(data.w*cs);
     c.height = parseInt(data.h*cs);
     compressedGrid = data.compressedBoard;
-    drawCompressedBoard(data.compressedBoard);
+    //drawCompressedBoard(data.compressedBoard);
     grid = data.board;
     boards = data.all_board_ids;
     names = data.all_board_names;
@@ -72,7 +72,7 @@ socket.on('initData', function(data){
 
 // Subsequent boards 
 socket.on('boardData', function(data){
-    drawCompressedBoard(data.compressedBoard);
+    //drawCompressedBoard(data.compressedBoard);
     compressedGrid = data.compressedBoard;
     //console.log(data.compressedBoard);
     grid = data.board;
@@ -334,7 +334,7 @@ var swapTool = function(tool){
 
 var swapGrid = function(){
     topGrid = !topGrid;
-    drawCompressedBoard(compressedGrid);
+    //drawCompressedBoard(compressedGrid);
 }
 
 var startStop = function(data){
@@ -448,7 +448,7 @@ document.addEventListener("mouseup", function(e){
             console.log("Clearing region");
             copying = false;
         }
-        drawCompressedBoard(compressedGrid);
+        //drawCompressedBoard(compressedGrid);
         findSelectedGrid();
         if(selGrid.wire.x.length != 0 || selGrid.head.x.length != 0 || selGrid.tail.x.length != 0)
             copying = true;
@@ -500,6 +500,8 @@ document.addEventListener("keydown", function(e){
 
 var draw = function(){
     window.requestAnimationFrame(draw);
+    
+    drawCompressedBoard(compressedGrid);
 
     if(drawing){ 
         emitSquare(mousePos.x,mousePos.y,playerTool);
@@ -507,12 +509,13 @@ var draw = function(){
     if(selecting){
         selRegion.y2 = mousePos.y;
         selRegion.x2 = mousePos.x;
-        drawCompressedBoard(compressedGrid);
+        
     }
     if(copying){
-        drawCompressedBoard(compressedGrid);
+        //drawCompressedBoard(compressedGrid);
         drawSelection();
     }
+
 }
 
 draw();
