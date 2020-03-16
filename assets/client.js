@@ -10,11 +10,11 @@ var cw = bw + (p*2) + 1;
 var ch = bh + (p*2) + 1;
 var cs = 20;
 var color={
-    0:"rgb(20, 0, 100)",
-    1:"yellow",
-    2:"red",
-    3:"orange",
-    4:"rgb(10,0,50)"
+    empty:"rgb(20, 0, 100)",
+    wire:"yellow",
+    head:"red",
+    tail:"orange",
+    grid:"black"
 };
 var playerTool = 1;
 var drawing = false;
@@ -72,7 +72,6 @@ socket.on('initData', function(data){
 
 // Subsequent boards 
 socket.on('boardData', function(data){
-    console.log("BOARD DATA")
     //drawCompressedBoard(data.compressedBoard);
     compressedGrid = data.compressedBoard;
     //console.log(data.compressedBoard);
@@ -93,23 +92,21 @@ slider.oninput = function(){
 var drawCompressedBoard = function(compressedBoard){
     ctx.beginPath();
     ctx.rect(0,0,c.width,c.height);
-    ctx.fillStyle=color[0];
+    ctx.fillStyle=color.empty;
     ctx.fill();
 
     if(!topGrid){
         drawGrid();
     }
 
-    fillColor = 1
     for(tool in compressedBoard){
         len = compressedBoard[tool].x.length;
         for(var i = 0; i < len; i++){
             ctx.beginPath();
             ctx.rect(compressedBoard[tool].x[i]*cs,compressedBoard[tool].y[i]*cs,cs,cs);
-            ctx.fillStyle=color[fillColor];
+            ctx.fillStyle=color[tool];
             ctx.fill();
         }
-        fillColor++;
     }
 
     if(topGrid){
@@ -132,8 +129,7 @@ var drawGrid = function(){
             var eAngle = 2*Math.PI;
             ctx.beginPath();
             ctx.arc(x, y, 1, sAngle, eAngle);
-            ctx.fillStyle="black";
-            // ctx.fillStyle=color[4];
+            ctx.fillStyle=color.grid;
             ctx.fill();
         }
     }
@@ -209,7 +205,6 @@ var findSelectedGrid = function(){
 
 var drawSelection = function(){
     ctx.globalAlpha = 0.5;
-    fillColor = 1;
     console.log(selGrid);
     for(tool in selGrid){
         len = selGrid[tool].x.length;
@@ -217,10 +212,9 @@ var drawSelection = function(){
         for(var i = 0; i < len; i++){
             ctx.beginPath();
             ctx.rect((selGrid[tool].x[i]+mousePos.x-selGrid.wire.x[0])*cs,(selGrid[tool].y[i]+mousePos.y-selGrid.wire.y[0])*cs,cs,cs);
-            ctx.fillStyle=color[fillColor];
+            ctx.fillStyle=color[tool];
             ctx.fill();
         }
-        fillColor++;
     }
     ctx.globalAlpha = 1;
 }
