@@ -314,13 +314,8 @@ io.on('connection', function (socket) {
     socket.on('paste', function(data){
         selGrid = data.selGrid;
         mousePos = data.mousePos;
-        wLen = selGrid.wire.x.length;
-        hLen = selGrid.head.x.length;
-        tLen = selGrid.tail.x.length;
         var toolNum = 1;
         for(tool in selGrid){
-            console.log(tool);
-            console.log(selGrid[tool]);
             len = selGrid[tool].x.length;
             for(var i =0; i < len; i++){
                 if ((selGrid[tool].y[i]+mousePos.y-selGrid.wire.y[0]) < BOARD_LIST[socket.boardID].grid.length && (selGrid[tool].x[i]+mousePos.x-selGrid.wire.x[0]) < BOARD_LIST[socket.boardID].grid[0].length) {
