@@ -65,7 +65,7 @@ class Board {
     that are electron heads, then it becomes a head
     */
    update() {
-       if (!this.paused) {
+       //if (!this.paused) {
            var boardCopy = this.arrayClone(this.grid);
            this.emptyCompressedGrid();
            for (var y = 0; y < boardCopy.length; y++) {
@@ -104,10 +104,10 @@ class Board {
                     }
                 }
             }
-        }
-        else{
+        //}
+        //else{
             //this.updateCompressedGrid();
-        }
+        //}
     }
     
     arrayClone(arr) {

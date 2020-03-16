@@ -72,6 +72,7 @@ socket.on('initData', function(data){
 
 // Subsequent boards 
 socket.on('boardData', function(data){
+    console.log("BOARD DATA")
     //drawCompressedBoard(data.compressedBoard);
     compressedGrid = data.compressedBoard;
     //console.log(data.compressedBoard);
