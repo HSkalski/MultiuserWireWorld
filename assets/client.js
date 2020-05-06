@@ -335,6 +335,10 @@ function newBoard(){
 }
 var canvasElem = document.querySelector("canvas"); 
 
+function toggleMute(){
+    toneGen.toggleMute();
+}
+
 c.addEventListener("mousedown", function(e){ 
     if(e.button == 0){ // Left mouse
         if(!copying){
