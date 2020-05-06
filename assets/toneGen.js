@@ -39,7 +39,6 @@ function ToneGenerator(){
         const freq = A4 * Math.pow(2, note/12) // Generate notes based off 440hz scale
         const oscillator = context.createOscillator();
         oscillator.type = types[Math.floor(Math.random() * types.length)];
-        console.log(oscillator.type);
         oscillator.frequency.value = freq;
 
         const gainNode = context.createGain();
