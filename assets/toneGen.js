@@ -17,7 +17,6 @@ function PlayNote(){
     //tone.genNote(1000);
     let i = -12
     let noteInterval = setInterval(function() {
-        console.log(i);
         tone.genNote(i);
         i+=1
         if(i>12){
@@ -48,7 +47,7 @@ function ToneGenerator(){
         gainNode.connect(context.destination);
 
         oscillator.start(0);
-        const duration = 0.1;
+        const duration = Math.random()/2;
         gainNode.gain.linearRampToValueAtTime(0.0001, context.currentTime + duration);
         oscillator.stop(context.currentTime + duration);
     }
