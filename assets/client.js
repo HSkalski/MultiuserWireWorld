@@ -1,7 +1,9 @@
 
 
+
+
 var socket = io();
-      
+    
 var c = document.getElementById("game");
 var ctx = c.getContext("2d");
 
@@ -48,6 +50,7 @@ var newBoardSubmission = document.getElementById("newBoardSubmission")
 newBoardSubmission.style.display = "none";
 
 // Audio init
+
 var toneGen = new ToneGenerator();
 
 var convertRange = function(value, r1, r2){
@@ -86,8 +89,7 @@ socket.on('boardData', function(data){
     grid = data.board;
     if(data.speed) slider.value = data.speed;
     if(data.test) console.log("clicked")
-    console.log(data.speed);
-
+    
     toneGen.genNote(parseInt(convertRange(data.speed, [1,100], [-12,12])));
 })
 
@@ -332,7 +334,11 @@ function newBoard(){
     newBoardSubmission.style.display = "none"
 }
 var canvasElem = document.querySelector("canvas"); 
-  
+
+function toggleMute(){
+    toneGen.toggleMute();
+}
+
 c.addEventListener("mousedown", function(e){ 
     if(e.button == 0){ // Left mouse
         if(!copying){
@@ -436,4 +442,6 @@ var draw = function(){
 
 }
 
-draw();
+window.onload = function() {
+    draw();
+}
