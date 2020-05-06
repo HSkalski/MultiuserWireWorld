@@ -33,12 +33,13 @@ function ToneGenerator(){
     
     const context = new AudioContext();
     const A4 = 440;
-
+    types = ["sine", "triangle"]
     this.genNote = function(note){
 
         const freq = A4 * Math.pow(2, note/12) // Generate notes based off 440hz scale
         const oscillator = context.createOscillator();
-        oscillator.type="sine";
+        oscillator.type = types[Math.floor(Math.random() * types.length)];
+        console.log(oscillator.type);
         oscillator.frequency.value = freq;
 
         const gainNode = context.createGain();
