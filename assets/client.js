@@ -1,3 +1,5 @@
+
+
 var socket = io();
       
 var c = document.getElementById("game");
@@ -45,6 +47,12 @@ var newOption = document.createElement("option");
 var newBoardSubmission = document.getElementById("newBoardSubmission")
 newBoardSubmission.style.display = "none";
 
+// Audio init
+var toneGen = new ToneGenerator();
+
+var convertRange = function(value, r1, r2){
+    return ( value - r1[ 0 ] ) * ( r2[ 1 ] - r2[ 0 ] ) / ( r1[ 1 ] - r1[ 0 ] ) + r2[ 0 ];
+}
 
 // First board sent with additional params
 socket.on('initData', function(data){
@@ -78,6 +86,9 @@ socket.on('boardData', function(data){
     grid = data.board;
     if(data.speed) slider.value = data.speed;
     if(data.test) console.log("clicked")
+    console.log(data.speed);
+
+    toneGen.genNote(parseInt(convertRange(data.speed, [1,100], [-12,12])));
 })
 
 socket.on('changeUserCount', function(data){
