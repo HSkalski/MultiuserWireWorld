@@ -1,3 +1,5 @@
+
+
 var socket = io();
       
 var c = document.getElementById("game");
@@ -10,11 +12,11 @@ var cw = bw + (p*2) + 1;
 var ch = bh + (p*2) + 1;
 var cs = 20;
 var color={
-    0:"rgb(20, 0, 100)",
-    1:"yellow",
-    2:"red",
-    3:"orange",
-    4:"rgb(10,0,50)"
+    empty:"rgb(20, 0, 100)",
+    wire:"yellow",
+    head:"red",
+    tail:"orange",
+    grid:"black"
 };
 var playerTool = 1;
 var drawing = false;
@@ -45,6 +47,12 @@ var newOption = document.createElement("option");
 var newBoardSubmission = document.getElementById("newBoardSubmission")
 newBoardSubmission.style.display = "none";
 
+// Audio init
+var toneGen = new ToneGenerator();
+
+var convertRange = function(value, r1, r2){
+    return ( value - r1[ 0 ] ) * ( r2[ 1 ] - r2[ 0 ] ) / ( r1[ 1 ] - r1[ 0 ] ) + r2[ 0 ];
+}
 
 // First board sent with additional params
 socket.on('initData', function(data){
@@ -78,6 +86,9 @@ socket.on('boardData', function(data){
     grid = data.board;
     if(data.speed) slider.value = data.speed;
     if(data.test) console.log("clicked")
+    console.log(data.speed);
+
+    toneGen.genNote(parseInt(convertRange(data.speed, [1,100], [-12,12])));
 })
 
 socket.on('changeUserCount', function(data){
@@ -92,68 +103,46 @@ slider.oninput = function(){
 var drawCompressedBoard = function(compressedBoard){
     ctx.beginPath();
     ctx.rect(0,0,c.width,c.height);
-    ctx.fillStyle=color[0];
+    ctx.fillStyle=color.empty;
     ctx.fill();
 
     if(!topGrid){
-        for (var i=0; i<c.width/cs-1; i++) {
-            for (var j=0; j<c.height/cs-1; j++) {
-                var x = (i+1)*cs;
-                var y = (j+1)*cs;
-                var sAngle = 0;
-                var eAngle = 2*Math.PI;
-                ctx.beginPath();
-                ctx.arc(x, y, 1, sAngle, eAngle);
-                ctx.fillStyle="black";
-                // ctx.fillStyle=color[4];
-                ctx.fill();
-            }
-        }
+        drawGrid();
     }
 
-    wLen = compressedBoard.wire.x.length;
-    hLen = compressedBoard.head.x.length;
-    tLen = compressedBoard.tail.x.length;
-    //ctx.globalAlpha = 0.5;
-    for(var i = 0; i < wLen; i++){
-        ctx.beginPath();
-        ctx.rect(compressedBoard.wire.x[i]*cs,compressedBoard.wire.y[i]*cs,cs,cs);
-        ctx.fillStyle=color[1];
-        ctx.fill();
-    }
-    for(var i = 0; i < hLen; i++){
-        ctx.beginPath();
-        ctx.rect(compressedBoard.head.x[i]*cs,compressedBoard.head.y[i]*cs,cs,cs);
-        ctx.fillStyle=color[2];
-        ctx.fill();
-    }
-    for(var i = 0; i < tLen; i++){
-        ctx.beginPath();
-        ctx.rect(compressedBoard.tail.x[i]*cs,compressedBoard.tail.y[i]*cs,cs,cs);
-        ctx.fillStyle=color[3];
-        ctx.fill();
+    for(tool in compressedBoard){
+        len = compressedBoard[tool].x.length;
+        for(var i = 0; i < len; i++){
+            ctx.beginPath();
+            ctx.rect(compressedBoard[tool].x[i]*cs,compressedBoard[tool].y[i]*cs,cs,cs);
+            ctx.fillStyle=color[tool];
+            ctx.fill();
+        }
     }
 
     if(topGrid){
-        for (var i=0; i<c.width/cs-1; i++) {
-            for (var j=0; j<c.height/cs-1; j++) {
-                var x = (i+1)*cs;
-                var y = (j+1)*cs;
-                var sAngle = 0;
-                var eAngle = 2*Math.PI;
-                ctx.beginPath();
-                ctx.arc(x, y, 1, sAngle, eAngle);
-                ctx.fillStyle="black";
-                // ctx.fillStyle=color[4];
-                ctx.fill();
-            }
-        }
+        drawGrid();
     }
     if(selRegion != {}){   
         drawSelected();
     }
     if(copying){
         drawSelection();
+    }
+}
+
+var drawGrid = function(){
+    for (var i=0; i<c.width/cs-1; i++) {
+        for (var j=0; j<c.height/cs-1; j++) {
+            var x = (i+1)*cs;
+            var y = (j+1)*cs;
+            var sAngle = 0;
+            var eAngle = 2*Math.PI;
+            ctx.beginPath();
+            ctx.arc(x, y, 1, sAngle, eAngle);
+            ctx.fillStyle=color.grid;
+            ctx.fill();
+        }
     }
 }
 
@@ -195,125 +184,54 @@ var findSelectedGrid = function(){
             y: []
         }
     }
-    wLen = compressedGrid.wire.x.length;
-    hLen = compressedGrid.head.x.length;
-    tLen = compressedGrid.tail.x.length;
-    //Wire
-    for(var i = 0; i < wLen; i++){
-        //console.log(selGrid);
-        if(!selYinv && !selXinv){ //top down, left to right
-            if(compressedGrid.wire.x[i] >= selRegion.x1 && compressedGrid.wire.x[i] <= selRegion.x2 && compressedGrid.wire.y[i] >= selRegion.y1 && compressedGrid.wire.y[i] <= selRegion.y2){
-                selGrid.wire.x.push(compressedGrid.wire.x[i]);
-                selGrid.wire.y.push(compressedGrid.wire.y[i]);
-            }
-        }else if(!selYinv){ //top down, right to left
-            if(compressedGrid.wire.x[i] <= selRegion.x1 && compressedGrid.wire.x[i] >= selRegion.x2 && compressedGrid.wire.y[i] >= selRegion.y1 && compressedGrid.wire.y[i] <= selRegion.y2){
-                selGrid.wire.x.push(compressedGrid.wire.x[i]);
-                selGrid.wire.y.push(compressedGrid.wire.y[i]);
-            }
-        }else if(!selXinv){ //bottom up, left to right
-            if(compressedGrid.wire.x[i] >= selRegion.x1 && compressedGrid.wire.x[i] <= selRegion.x2 && compressedGrid.wire.y[i] <= selRegion.y1 && compressedGrid.wire.y[i] >= selRegion.y2){
-                selGrid.wire.x.push(compressedGrid.wire.x[i]);
-                selGrid.wire.y.push(compressedGrid.wire.y[i]);
-            }
-        }else{ // bottom up,  right to left
-            if(compressedGrid.wire.x[i] <= selRegion.x1 && compressedGrid.wire.x[i] >= selRegion.x2 && compressedGrid.wire.y[i] <= selRegion.y1 && compressedGrid.wire.y[i] >= selRegion.y2){
-                selGrid.wire.x.push(compressedGrid.wire.x[i]);
-                selGrid.wire.y.push(compressedGrid.wire.y[i]);
-            }
-        }
-    }
-    //Heads
-    for(var i = 0; i < hLen; i++){
-        if(!selYinv && !selXinv){ //top down, left to right
-            if(compressedGrid.head.x[i] >= selRegion.x1 && compressedGrid.head.x[i] <= selRegion.x2 && compressedGrid.head.y[i] >= selRegion.y1 && compressedGrid.head.y[i] <= selRegion.y2){
-                selGrid.head.x.push(compressedGrid.head.x[i]);
-                selGrid.head.y.push(compressedGrid.head.y[i]);
-            }
-        }else if(!selYinv){ //top down, right to left
-            if(compressedGrid.head.x[i] <= selRegion.x1 && compressedGrid.head.x[i] >= selRegion.x2 && compressedGrid.head.y[i] >= selRegion.y1 && compressedGrid.head.y[i] <= selRegion.y2){
-                selGrid.head.x.push(compressedGrid.head.x[i]);
-                selGrid.head.y.push(compressedGrid.head.y[i]);
-            }
-        }else if(!selXinv){ //bottom up, left to right
-            if(compressedGrid.head.x[i] >= selRegion.x1 && compressedGrid.head.x[i] <= selRegion.x2 && compressedGrid.head.y[i] <= selRegion.y1 && compressedGrid.head.y[i] >= selRegion.y2){
-                selGrid.head.x.push(compressedGrid.head.x[i]);
-                selGrid.head.y.push(compressedGrid.head.y[i]);
-            }
-        }else{ // bottom up,  right to left
-            if(compressedGrid.head.x[i] <= selRegion.x1 && compressedGrid.head.x[i] >= selRegion.x2 && compressedGrid.head.y[i] <= selRegion.y1 && compressedGrid.head.y[i] >= selRegion.y2){
-                selGrid.head.x.push(compressedGrid.head.x[i]);
-                selGrid.head.y.push(compressedGrid.head.y[i]);
-            }
-        }
-    }
-    //Tails
-    for(var i = 0; i < tLen; i++){
-        if(!selYinv && !selXinv){ //top down, left to right
-            if(compressedGrid.tail.x[i] >= selRegion.x1 && compressedGrid.tail.x[i] <= selRegion.x2 && compressedGrid.tail.y[i] >= selRegion.y1 && compressedGrid.tail.y[i] <= selRegion.y2){
-                selGrid.tail.x.push(compressedGrid.tail.x[i]);
-                selGrid.tail.y.push(compressedGrid.tail.y[i]);
-            }
-        }else if(!selYinv){ //top down, right to left
-            if(compressedGrid.tail.x[i] <= selRegion.x1 && compressedGrid.tail.x[i] >= selRegion.x2 && compressedGrid.tail.y[i] >= selRegion.y1 && compressedGrid.tail.y[i] <= selRegion.y2){
-                selGrid.tail.x.push(compressedGrid.tail.x[i]);
-                selGrid.tail.y.push(compressedGrid.tail.y[i]);
-            }
-        }else if(!selXinv){ //bottom up, left to right
-            if(compressedGrid.tail.x[i] >= selRegion.x1 && compressedGrid.tail.x[i] <= selRegion.x2 && compressedGrid.tail.y[i] <= selRegion.y1 && compressedGrid.tail.y[i] >= selRegion.y2){
-                selGrid.tail.x.push(compressedGrid.tail.x[i]);
-                selGrid.tail.y.push(compressedGrid.tail.y[i]);
-            }
-        }else{ // bottom up,  right to left
-            if(compressedGrid.tail.x[i] <= selRegion.x1 && compressedGrid.tail.x[i] >= selRegion.x2 && compressedGrid.tail.y[i] <= selRegion.y1 && compressedGrid.tail.y[i] >= selRegion.y2){
-                selGrid.tail.x.push(compressedGrid.tail.x[i]);
-                selGrid.tail.y.push(compressedGrid.tail.y[i]);
-            }
-        }
-    }
 
+    for(tool in selGrid){
+        len = compressedGrid[tool].x.length;
+        for(var i = 0; i < len; i++){
+            //console.log(selGrid);
+            if(!selYinv && !selXinv){ //top down, left to right
+                if(compressedGrid[tool].x[i] >= selRegion.x1 && compressedGrid[tool].x[i] <= selRegion.x2 && compressedGrid[tool].y[i] >= selRegion.y1 && compressedGrid[tool].y[i] <= selRegion.y2){
+                    selGrid[tool].x.push(compressedGrid[tool].x[i]);
+                    selGrid[tool].y.push(compressedGrid[tool].y[i]);
+                }
+            }else if(!selYinv){ //top down, right to left
+                if(compressedGrid[tool].x[i] <= selRegion.x1 && compressedGrid[tool].x[i] >= selRegion.x2 && compressedGrid[tool].y[i] >= selRegion.y1 && compressedGrid[tool].y[i] <= selRegion.y2){
+                    selGrid[tool].x.push(compressedGrid[tool].x[i]);
+                    selGrid[tool].y.push(compressedGrid[tool].y[i]);
+                }
+            }else if(!selXinv){ //bottom up, left to right
+                if(compressedGrid[tool].x[i] >= selRegion.x1 && compressedGrid[tool].x[i] <= selRegion.x2 && compressedGrid[tool].y[i] <= selRegion.y1 && compressedGrid[tool].y[i] >= selRegion.y2){
+                    selGrid[tool].x.push(compressedGrid[tool].x[i]);
+                    selGrid[tool].y.push(compressedGrid[tool].y[i]);
+                }
+            }else{ // bottom up,  right to left
+                if(compressedGrid[tool].x[i] <= selRegion.x1 && compressedGrid[tool].x[i] >= selRegion.x2 && compressedGrid[tool].y[i] <= selRegion.y1 && compressedGrid[tool].y[i] >= selRegion.y2){
+                    selGrid[tool].x.push(compressedGrid[tool].x[i]);
+                    selGrid[tool].y.push(compressedGrid[tool].y[i]);
+                }
+            }
+        } 
+    }
 }
 
 var drawSelection = function(){
     ctx.globalAlpha = 0.5;
-    wLen = selGrid.wire.x.length;
-    hLen = selGrid.head.x.length;
-    tLen = selGrid.tail.x.length;
-    for(var i = 0; i < wLen; i++){
-        ctx.beginPath();
-        ctx.rect((selGrid.wire.x[i]+mousePos.x-selGrid.wire.x[0])*cs,(selGrid.wire.y[i]+mousePos.y-selGrid.wire.y[0])*cs,cs,cs);
-        ctx.fillStyle=color[1];
-        ctx.fill();
-    }
-    for(var i = 0; i < hLen; i++){
-        ctx.beginPath();
-        ctx.rect((selGrid.head.x[i]+mousePos.x-selGrid.wire.x[0])*cs,(selGrid.head.y[i]+mousePos.y-selGrid.wire.y[0])*cs,cs,cs);
-        ctx.fillStyle=color[2];
-        ctx.fill();
-    }
-    for(var i = 0; i < tLen; i++){
-        ctx.beginPath();
-        ctx.rect((selGrid.tail.x[i]+mousePos.x-selGrid.wire.x[0])*cs,(selGrid.tail.y[i]+mousePos.y-selGrid.wire.y[0])*cs,cs,cs);
-        ctx.fillStyle=color[3];
-        ctx.fill();
+    console.log(selGrid);
+    for(tool in selGrid){
+        len = selGrid[tool].x.length;
+        console.log(tool);
+        for(var i = 0; i < len; i++){
+            ctx.beginPath();
+            ctx.rect((selGrid[tool].x[i]+mousePos.x-selGrid.wire.x[0])*cs,(selGrid[tool].y[i]+mousePos.y-selGrid.wire.y[0])*cs,cs,cs);
+            ctx.fillStyle=color[tool];
+            ctx.fill();
+        }
     }
     ctx.globalAlpha = 1;
 }
 
 var pasteSelection = function(){
     socket.emit('paste', {selGrid,mousePos});
-    // wLen = selGrid.wire.x.length;
-    // hLen = selGrid.head.x.length;
-    // tLen = selGrid.tail.x.length;
-    // for(var i = 0; i < wLen; i++){
-    //     emitSquare((selGrid.wire.x[i]+mousePos.x-selGrid.wire.x[0]),(selGrid.wire.y[i]+mousePos.y-selGrid.wire.y[0]),1);
-    // }
-    // for(var i = 0; i < hLen; i++){
-    //     emitSquare((selGrid.head.x[i]+mousePos.x-selGrid.wire.x[0]),(selGrid.head.y[i]+mousePos.y-selGrid.wire.y[0]),2);
-    // }
-    // for(var i = 0; i < tLen; i++){
-    //     emitSquare((selGrid.tail.x[i]+mousePos.x-selGrid.wire.x[0]),(selGrid.tail.y[i]+mousePos.y-selGrid.wire.y[0]),3);
-    // }
 }
 
 var swapTool = function(tool){

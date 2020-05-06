@@ -64,6 +64,7 @@
         <div style="display:inline;">
             <button class=button onclick="startStop('start')">Start</button>
             <button class=button onclick="startStop('stop')">Stop</button>
+            <button class=button onclick="startStop('step')">Step</button>
         </div>
         <input type="range" min="1" max="100" value="50" class="slider" id="speedRange">
         <button class=button onclick="saveBoard()">Save</button>
@@ -108,6 +109,7 @@
             <li>Wire -> Head if one or two neighbors are Heads</li>
         </ol>
     </div>
+    <script src="/assets/toneGen.js"></script>
     <script src="/assets/client.js"></script>
 </body>
 <footer class=text style="padding: 10px;">

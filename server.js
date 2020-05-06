@@ -82,13 +82,13 @@ var startBoards = (boards) => {
 var startBoard = (board) => {
     board.logicFunction = () =>{
         board.logicInterval = setInterval(function () {
-            board.update();
             //console.log(board.compressedGrid)
-
+            
             ///// Experimental board sending method /////
             /// Issues: 
             //     Doesn't send board updates when clicked, needs separate non updating function to recompute compressed data
             if(!board.paused){
+                board.update();
                 for(socket_id in board.CONNECTED_SOCKETS){
                     socket = board.CONNECTED_SOCKETS[socket_id];
                     socket.emit('boardData', {
@@ -314,13 +314,8 @@ io.on('connection', function (socket) {
     socket.on('paste', function(data){
         selGrid = data.selGrid;
         mousePos = data.mousePos;
-        wLen = selGrid.wire.x.length;
-        hLen = selGrid.head.x.length;
-        tLen = selGrid.tail.x.length;
         var toolNum = 1;
         for(tool in selGrid){
-            console.log(tool);
-            console.log(selGrid[tool]);
             len = selGrid[tool].x.length;
             for(var i =0; i < len; i++){
                 if ((selGrid[tool].y[i]+mousePos.y-selGrid.wire.y[0]) < BOARD_LIST[socket.boardID].grid.length && (selGrid[tool].x[i]+mousePos.x-selGrid.wire.x[0]) < BOARD_LIST[socket.boardID].grid[0].length) {
@@ -344,6 +339,19 @@ io.on('connection', function (socket) {
         }
         else if (data.data == 'stop') {
             BOARD_LIST[socket.boardID].paused = true;
+        }
+        else if (data.data == 'step'){
+            if(BOARD_LIST[socket.boardID].paused){
+                BOARD_LIST[socket.boardID].update();
+                for(socket_id in BOARD_LIST[socket.boardID].CONNECTED_SOCKETS){
+                    s = BOARD_LIST[socket.boardID].CONNECTED_SOCKETS[socket_id];
+                    s.emit('boardData', {
+                        compressedBoard: BOARD_LIST[s.boardID].compressedGrid,
+                        speed: (BOARD_LIST[s.boardID].tickSpeed / BOARD_LIST[s.boardID].tickReductionRatio),
+                    })
+                }
+                
+            }
         }
 
     })
