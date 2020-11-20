@@ -45,7 +45,7 @@ It follows four basic rules each tick:
 |Better Pan / Zoom| Planned|
 |Chat functionality|Planned|
 |Intro / Rules List|Started|
-| Tones based on state changes | Planned |
+| Tones based on state changes | Started, bug with tones piling up making one loud tone once loaded |
 
 | Optimizations | |
 | --- | --- |
