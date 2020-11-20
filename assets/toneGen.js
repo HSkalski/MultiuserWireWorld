@@ -25,7 +25,7 @@ function ToneGenerator(){
     
     const context = new AudioContext();
     const A4 = 440;
-    let mute = false;
+    let mute = true;
     types = ["sine", "triangle"]
     this.genNote = function(note){
 
