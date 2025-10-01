@@ -2,49 +2,48 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var mongoose = require('mongoose');
 
 var fs = require('fs');
 var Board = require('./board.js');
 
 var runningLocal = true;
-try{var config = require('./configs/keys.js')
-}catch{console.log("Config not found"); runningLocal = false;}
+// try{var config = require('./configs/keys.js')
+// }catch{console.log("Config not found"); runningLocal = false;}
 
 
 // If config is found, it is a local version, else, use heroku env vars
-if(runningLocal){
-    mongoose.connect(config.mongodb.uri, {
-        useNewUrlParser: true, 
-        useUnifiedTopology: true
-    });
-}else if(typeof process.env.DATABASE_URL != 'undefined'){
-    mongoose.connect(process.env.DATABASE_URL, {
-        useNewUrlParser: true, 
-        useUnifiedTopology: true
-    });
-}else{
-    console.log("not connecting to database");
-}
+// if(runningLocal){
+//     mongoose.connect(config.mongodb.uri, {
+//         useNewUrlParser: true, 
+//         useUnifiedTopology: true
+//     });
+// }else if(typeof process.env.DATABASE_URL != 'undefined'){
+//     mongoose.connect(process.env.DATABASE_URL, {
+//         useNewUrlParser: true, 
+//         useUnifiedTopology: true
+//     });
+// }else{
+//     console.log("not connecting to database");
+// }
 
-var boardSchema = new mongoose.Schema({
-    name: String,
-    id: Number,
-    height: Number,
-    width: Number,
-    cellSize: Number,
-    tickSpeed: Number,
-    tickReductionRatio: Number,
-    grid: Array,
-    compressedGrid: Object
-});
-var BoardModel = mongoose.model('BoardModel',boardSchema);
+// var boardSchema = new mongoose.Schema({
+//     name: String,
+//     id: Number,
+//     height: Number,
+//     width: Number,
+//     cellSize: Number,
+//     tickSpeed: Number,
+//     tickReductionRatio: Number,
+//     grid: Array,
+//     compressedGrid: Object
+// });
+// var BoardModel = mongoose.model('BoardModel',boardSchema);
 
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function() {
-  console.log('Connected To Database!')
-});
+// var db = mongoose.connection;
+// db.on('error', console.error.bind(console, 'connection error:'));
+// db.once('open', function() {
+//   console.log('Connected To Database!')
+// });
 
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
@@ -137,50 +136,49 @@ var saveAllBoards = () => {
 var saveBoard = (id) => {
     ///////// Old board saving method ////////////////////
     // Strip board of specific data before saving to file
-    // var clone = Object.assign({}, BOARD_LIST[id]);
-    // delete clone.CONNECTED_SOCKETS;
-    // delete clone.logicInterval;
-    // console.log(clone);
-    // fs.writeFile(
-    //     "./boards/board_" + String(id) + ".txt",
+    var clone = Object.assign({}, BOARD_LIST[id]);
+    delete clone.CONNECTED_SOCKETS;
+    delete clone.logicInterval;
+    fs.writeFile(
+        "./boards/board_" + String(id) + ".txt",
         
-    //     JSON.stringify(clone),
-    //     (err) => {
-    //         // In case of a error throw err. 
-    //         if (err) throw err;
-    //     }
-    // );
+        JSON.stringify(clone),
+        (err) => {
+            // In case of a error throw err. 
+            if (err) throw err;
+        }
+    );
     ///////////////////////////////////////////////////////
 
-    BoardModel.findOneAndUpdate({id: id}, {
-        tickSpeed: BOARD_LIST[id].tickSpeed,
-        grid: BOARD_LIST[id].grid,
-        compressedGrid:BOARD_LIST[id].compressedGrid
-    },{useFindAndModify: false},function(err,doc){
-        if(err){console.error(err)};
+    // BoardModel.findOneAndUpdate({id: id}, {
+    //     tickSpeed: BOARD_LIST[id].tickSpeed,
+    //     grid: BOARD_LIST[id].grid,
+    //     compressedGrid:BOARD_LIST[id].compressedGrid
+    // },{useFindAndModify: false},function(err,doc){
+    //     if(err){console.error(err)};
 
-        if(doc == null){
-            var save_board = new BoardModel({
-                name: BOARD_LIST[id].name,
-                id: BOARD_LIST[id].id,
-                height: BOARD_LIST[id].height,
-                width: BOARD_LIST[id].width,
-                cellSize: BOARD_LIST[id].cellSize,
-                tickSpeed: BOARD_LIST[id].tickSpeed,
-                tickReductionRatio: BOARD_LIST[id].tickReductionRatio,
-                grid: BOARD_LIST[id].grid,
-                compressedGrid:BOARD_LIST[id].compressedGrid
-            });
-            //console.log(save_board);
-            save_board.save(function (err, save_board){
-                if(err) return console.error(err);
-                console.log("Saved Board to Database");
-            });
-        }
-        else{
-            console.log("Updated Board in Database");
-        }
-    });
+    //     if(doc == null){
+    //         var save_board = new BoardModel({
+    //             name: BOARD_LIST[id].name,
+    //             id: BOARD_LIST[id].id,
+    //             height: BOARD_LIST[id].height,
+    //             width: BOARD_LIST[id].width,
+    //             cellSize: BOARD_LIST[id].cellSize,
+    //             tickSpeed: BOARD_LIST[id].tickSpeed,
+    //             tickReductionRatio: BOARD_LIST[id].tickReductionRatio,
+    //             grid: BOARD_LIST[id].grid,
+    //             compressedGrid:BOARD_LIST[id].compressedGrid
+    //         });
+    //         //console.log(save_board);
+    //         save_board.save(function (err, save_board){
+    //             if(err) return console.error(err);
+    //             console.log("Saved Board to Database");
+    //         });
+    //     }
+    //     else{
+    //         console.log("Updated Board in Database");
+    //     }
+    // });
 
 
 }
@@ -189,45 +187,45 @@ var saveBoard = (id) => {
 var loadBoards = () => {
     console.log('Loading Files...')
     ///////////////// Old File Loading Method //////////////
-    // fs.readdir(
-    //     './boards',
-    //     (err, files) => {
-    //         if (err) throw err;
-    //         console.log("\t",files);
-    //         for (file in files) {
-    //             fs.readFile(
-    //                 "./boards/" + files[file],
-    //                 (err, data) => {
-    //                     if (err) throw err;
-    //                     var board = new Board('', 1, 1, 1);
-    //                     var parsedData = JSON.parse(data);
-    //                     Object.assign(board, parsedData)
-    //                     BOARD_LIST[board.id] = board;
-    //                     BOARD_LIST[board.id].paused = true;
-    //                     startBoard(BOARD_LIST[board.id]);
-    //                 }
-    //             )
-    //         }          
-    //     }
-    // )
+    fs.readdir(
+        './boards',
+        (err, files) => {
+            if (err) throw err;
+            console.log("\t",files);
+            for (file in files) {
+                fs.readFile(
+                    "./boards/" + files[file],
+                    (err, data) => {
+                        if (err) throw err;
+                        var board = new Board('', 1, 1, 1);
+                        var parsedData = JSON.parse(data);
+                        Object.assign(board, parsedData)
+                        BOARD_LIST[board.id] = board;
+                        BOARD_LIST[board.id].paused = true;
+                        startBoard(BOARD_LIST[board.id]);
+                    }
+                )
+            }          
+        }
+    )
     ///////////////////////////////////////////////////////
 
-    BoardModel.find(function(err, boards){
-        if (err) return console.error(err);
-        for(var i = 0; i < boards.length; i++){
-            var board = boards[i]
-            var newBoard = new Board(board.name,board.height,board.width,board.cellSize);
-            newBoard.id = board.id;
-            newBoard.grid = board.grid;
-            newBoard.compressedGrid = board.compressedGrid;
-            newBoard.tickSpeed = board.tickSpeed;
-            newBoard.tickReductionRatio = board.tickReductionRatio;
-            BOARD_LIST[board.id] = newBoard;
-            BOARD_LIST[board.id].paused = true;
-            startBoard(BOARD_LIST[board.id]);
-        }
-        console.log("Boards Loaded!");
-    });
+    // BoardModel.find(function(err, boards){
+    //     if (err) return console.error(err);
+    //     for(var i = 0; i < boards.length; i++){
+    //         var board = boards[i]
+    //         var newBoard = new Board(board.name,board.height,board.width,board.cellSize);
+    //         newBoard.id = board.id;
+    //         newBoard.grid = board.grid;
+    //         newBoard.compressedGrid = board.compressedGrid;
+    //         newBoard.tickSpeed = board.tickSpeed;
+    //         newBoard.tickReductionRatio = board.tickReductionRatio;
+    //         BOARD_LIST[board.id] = newBoard;
+    //         BOARD_LIST[board.id].paused = true;
+    //         startBoard(BOARD_LIST[board.id]);
+    //     }
+    //     console.log("Boards Loaded!");
+    // });
 }
 loadBoards();
 
