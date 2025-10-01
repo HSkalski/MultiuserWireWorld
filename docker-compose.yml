@@ -1,0 +1,9 @@
+services:
+  wire-world:
+    image: node:18-alpine
+    command: sh -c "npm install && npm start"
+    ports: 
+      - 2000:2000
+    working_dir: /wire-world
+    volumes:
+      - ./:/wire-world
